@@ -1,25 +1,30 @@
 from statemachine import State
+from logger import fsm_logger
+
 
 class StarterCalc(State.Compound):
 
     choose_direction=State(initial=True)
     waiting_sourdough_weight=State()
     choosing_starter_proportions=State()
-    show_result=State(final=True)
+    show_result_starter_calc=State(final=True)
 
     enter_direction=choose_direction.to(waiting_sourdough_weight)
     enter_weight=waiting_sourdough_weight.to(choosing_starter_proportions)
-    calculate=choosing_starter_proportions.to(show_result)
+    calculate=choosing_starter_proportions.to(show_result_starter_calc)
 
 
     back = (
             waiting_sourdough_weight.to(choose_direction) |
-            choosing_starter_proportions.to(waiting_sourdough_weight)
+            choosing_starter_proportions.to(waiting_sourdough_weight)|
+            show_result_starter_calc.to(choosing_starter_proportions)
 
     )
 
+
+
     def on_enter_state(self, source:State, target: State, event: str):
-        print(f"Перешли из {source.id} в {target.id}. Событие: {event}")
+        fsm_logger.debug(f"Перешли из {source.id} в {target.id}. Событие: {event}")
 
 
 class ToolsMenu(State.Compound):
@@ -36,6 +41,6 @@ class ToolsMenu(State.Compound):
             )
 
     def on_enter_state(self, source:State, target: State, event: str):
-        print(f"Перешли из {source.id} в {target.id}. Событие: {event}")
+        fsm_logger.debug(f"Перешли из {source.id} в {target.id}. Событие: {event}")
 
 

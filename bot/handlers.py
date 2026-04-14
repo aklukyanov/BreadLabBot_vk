@@ -14,7 +14,6 @@ async def hello_handler(message: Message):
     # Получаем информацию о пользователе
     user_info = await message.ctx_api.users.get(user_ids=message.from_id)
     user = user_info[0]
-
     await message.answer(message=greeting.format(user.first_name))
     await message.answer('Главное меню', keyboard=main_menu_keyboard)
 
@@ -62,4 +61,9 @@ async def events_handler(event: MessageEvent):
     )
 
     await manager.handle_event(event)
+
+@global_labeler.message(blocking=False)
+async def message_handler(message:Message):
+    await manager.handle_message(message)
+
 

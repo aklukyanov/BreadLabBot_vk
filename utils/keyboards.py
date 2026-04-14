@@ -37,7 +37,7 @@ main_menu_keyboard = (
 #Инструменты
 tools_menu_keyboard = (
     Keyboard(inline=True)
-    .add(Callback("🧮 Калькулятор закваски", payload={"cmd": "starter_calc"}))
+    .add(Callback("🧮 Калькулятор закваски", payload={"cmd": "open_starter_calc"}))
     .row()
     .add(Callback("⚖️ Расчет пропорций", payload={"cmd": "proportions_calc"}))
     .row()
@@ -51,42 +51,45 @@ tools_menu_keyboard = (
 #starter_calc
 choose_direction_keyboard = (
     Keyboard(inline=True)
-    .add(Callback("50% → 100%", payload={"cmd": "50to100"}))
+    .add(Callback("50% → 100%", payload={"cmd": "enter_direction", "direction": "50to100"}))
     .row()
-    .add(Callback("100% → 50%", payload={"cmd": "100to50"}))
+    .add(Callback("100% → 50%", payload={"cmd": "enter_direction", "direction": "100to50"}))
     .row()
-    .add(Callback("◀️ Назад", payload={"cmd": "tools"}))
+    .add(Callback("◀️ Назад", payload={"cmd": "back"}))
     .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
 ).get_json()
 
 choosing_starter_proportions_50to100_keyboard = (
     Keyboard(inline=True)
-    .add(Callback("1:1:1", payload={"cmd": "1:1:1"}))
-    .add(Callback("1:2:2", payload={"cmd": "1:2:2"}))
-    .add(Callback("1:3:3", payload={"cmd": "1:3:3"}))
-    .add(Callback("1:4:4", payload={"cmd": "1:4:4"}))
+    .add(Callback("1:1:1", payload={"cmd": "calculate", "starter_proportions": "1:1:1"}))
+    .add(Callback("1:2:2", payload={"cmd": "calculate", "starter_proportions": "1:2:2"}))
+    .add(Callback("1:3:3", payload={"cmd": "calculate", "starter_proportions": "1:3:3"}))
+    .add(Callback("1:4:4", payload={"cmd": "calculate", "starter_proportions": "1:4:4"}))
     .row()
-    .add(Callback("1:5:5", payload={"cmd": "1:5:5"}))
-    .add(Callback("1:6:6", payload={"cmd": "1:6:6"}))
-    .add(Callback("1:7:7", payload={"cmd": "1:7:7"}))
-    .add(Callback("1:8:8", payload={"cmd": "1:8:8"}))
+    .add(Callback("1:5:5", payload={"cmd": "calculate", "starter_proportions": "1:5:5"}))
+    .add(Callback("1:6:6", payload={"cmd": "calculate", "starter_proportions": "1:6:6"}))
+    .add(Callback("1:7:7", payload={"cmd": "calculate", "starter_proportions": "1:7:7"}))
+    .add(Callback("1:8:8", payload={"cmd": "calculate", "starter_proportions": "1:8:8"}))
     .row()
-    .add(Callback("⬅️ Назад", payload={"cmd": "50to100"}))
+    .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
     .row()
     .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
 ).get_json()
 
 choosing_starter_proportions_100to50_keyboard = (
     Keyboard(inline=True)
-    .add(Callback("1:0.5:1", payload={"cmd": "1:0.5:1"}))
-    .add(Callback("1:1:2", payload={"cmd": "1:1:2"}))
-    .add(Callback("1:1.5:3", payload={"cmd": "1:1.5:3"}))
-    .add(Callback("1:2:4", payload={"cmd": "1:2:4"}))
+    .add(Callback("1:0.5:1", payload={"cmd": "calculate", "starter_proportions": "1:0.5:1"}))
+    .add(Callback("1:1:2", payload={"cmd": "calculate", "starter_proportions": "1:1:2"}))
+    .add(Callback("1:1.5:3", payload={"cmd": "calculate", "starter_proportions": "1:1.5:3"}))
+    .add(Callback("1:2:4", payload={"cmd": "calculate", "starter_proportions": "1:2:4"}))
     .row()
-    .add(Callback("⬅️ Назад", payload={"cmd": "100to50"}))
+    .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
     .row()
     .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
 ).get_json()
+
+
+
 
 def approve_keyboard(yes_cmd, no_cmd, recipe_id):
     return (
