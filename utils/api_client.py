@@ -35,10 +35,10 @@ class BreadlabAPIClient:
                 if response.status == 200:
                     return await response.json(), None
                 else:
-                    return None, "Ошибка сервера. Попробуйте еще раз!"
+                    return None, "Ошибка сервера."
         except Exception as e:
             api_client_logger.error(f"API error [{cls.BASE_URL}{endpoint}]: {e}")
-            return None, f"Сервер недоступен. Попробуйте еще раз!"
+            return None, f"Сервер недоступен."
 
     @classmethod
     async def get(cls, endpoint: str, params: dict=None):
@@ -54,14 +54,39 @@ class BreadlabAPIClient:
                 if response.status == 200:
                     return await response.json(), None
                 else:
-                    return None, "Ошибка сервера. Попробуйте еще раз!"
+                    return None, "Ошибка сервера."
         except Exception as e:
             api_client_logger.error(f"API error [{cls.BASE_URL}{endpoint}]: {e}")
-            return None, f"Сервер недоступен. Попробуйте еще раз!"
+            return None, f"Сервер недоступен."
 
+    @classmethod
+    async def get_user_recipes(cls, external_id: str, page: int = 1):
+        """Получить рецепты пользователя с пагинацией"""
+        return await cls.get(
+            f"/users/{external_id}/recipes/",
+            params={"page": page}
+        )
+    @classmethod
+    async def get_recipe(cls, recipe_id: str):
+        """Получить один рецепт по ID"""
+        return await cls.get(f"/recipes/{recipe_id}/")
 
+    @classmethod
+    async def delete_recipe(cls, recipe_id: str):
+        """Удалить рецепт по ID."""
+        session = cls.get_or_create_session()
+        try:
+            api_client_logger.info(f"DELETE [{cls.BASE_URL}/recipes/{recipe_id}/delete/]")
+            async with session.delete(
+                    f"{cls.BASE_URL}/recipes/{recipe_id}/delete/",
+                    timeout=10
+            ) as response:
+                api_client_logger.info(f"API response [{cls.BASE_URL}/recipes/{recipe_id}/delete/]: {response}")
+                if response.status == 200:
+                    return await response.json(), None
+                else:
+                    return None, "Ошибка сервера."
 
-
-
-
-
+        except Exception as e:
+            api_client_logger.error(f"API error [{cls.BASE_URL}/recipes/{recipe_id}/delete/]: {e}")
+            return None, f"Сервер недоступен."

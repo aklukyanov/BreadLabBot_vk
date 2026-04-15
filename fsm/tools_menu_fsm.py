@@ -2,7 +2,7 @@ from statemachine import State
 from logger import fsm_logger
 
 
-class StarterCalc(State.Compound):
+class StarterCalcFSM(State.Compound):
 
     choose_direction=State(initial=True)
     waiting_sourdough_weight=State()
@@ -27,10 +27,10 @@ class StarterCalc(State.Compound):
         fsm_logger.debug(f"Перешли из {source.id} в {target.id}. Событие: {event}")
 
 
-class ToolsMenu(State.Compound):
+class ToolsMenuFSM(State.Compound):
 
     tools=State(initial=True)
-    starter_calc=StarterCalc
+    starter_calc=StarterCalcFSM
     proportions_calc=State()
 
     open_starter_calc=tools.to(starter_calc)

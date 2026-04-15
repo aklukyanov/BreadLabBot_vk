@@ -43,6 +43,7 @@ async def hello_handler(message: Message):
 
         storage.set(key=message.peer_id,
                     value={
+                        "peer_id": message.peer_id,
                         "state_config": ["main"],
                         "context": {}
                     })

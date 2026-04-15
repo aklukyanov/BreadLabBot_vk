@@ -1,4 +1,3 @@
-
 from vkbottle.bot import Message
 from vkbottle_types.events.bot_events import MessageEvent
 from controllers.state_handlers_registry import states
@@ -45,7 +44,6 @@ class SessionManager:
 
             new_state = new_state_config[-1]  # Берём последний элемент — строку
             await states[new_state].show_screen(event, session_data) # вызываем экран нового состояния
-
 
             storage.set(key=peer_id, value=session_data)
             test_data = storage.get(key=event.object.peer_id)

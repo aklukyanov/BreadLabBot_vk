@@ -7,10 +7,20 @@ from vkbottle_types.events.bot_events import MessageEvent
 
 class BaseStateHandler(ABC):
 
-    async def show_screen(self, event: MessageEvent | Message, session_data: dict, custom_message: str = None, custom_keyboard: str = None):
+    def get_payload(self, event: MessageEvent | Message, key: str, default=None):
+        """Платформонезависимое получение параметра из payload/data"""
+        # VK MessageEvent (нажатие на кнопку)
+        if isinstance(event, MessageEvent):
+            return event.object.payload.get(key, default)
+        # VK Message (текстовое сообщение)
+        elif isinstance(event, Message):
+            # У текстовых сообщений нет payload, возвращаем default (None)
+            return default
+
+    async def show_screen(self, event: MessageEvent | Message, session_data: dict):
         """Универсальная отрисовка экрана"""
-        message_text = custom_message or self.get_message(session_data)
-        keyboard = custom_keyboard or self.get_keyboard(session_data)
+        message_text = self.get_message(session_data)
+        keyboard = self.get_keyboard(session_data)
 
         if isinstance(event, MessageEvent):
             await event.ctx_api.messages.send(
@@ -25,12 +35,12 @@ class BaseStateHandler(ABC):
                 keyboard=keyboard
             )
     @abstractmethod
-    def get_message(self, context: dict) -> str:
+    def get_message(self, session_data: dict) -> str:
         """Текст, для сообщения"""
         pass
 
     @abstractmethod
-    def get_keyboard(self, context:dict) -> str:
+    def get_keyboard(self, session_data:dict) -> str|None:
         """Клавиатура для этого состояния (или None)"""
         pass
 
