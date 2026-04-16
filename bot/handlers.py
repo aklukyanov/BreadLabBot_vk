@@ -30,7 +30,7 @@ async def hello_handler(message: Message):
                     "gender": user.sex,
                     "username": user.screen_name
                 },
-                timeout=5
+                timeout=1
             ) as response:
                 if response.status in [200,201]:
                     result = await response.json()
