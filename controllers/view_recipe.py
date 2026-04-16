@@ -9,6 +9,7 @@ from utils.keyboards import edit_recipe_keyboard, error_keyboard
 
 class ViewRecipeStateHandler(BaseStateHandler):
     async def show_screen(self, event: MessageEvent | Message, session_data: dict):
+
         recipe_id = session_data["context"]["recipe_id"]
 
         result, error = await BreadlabAPIClient.get_recipe(recipe_id=recipe_id)

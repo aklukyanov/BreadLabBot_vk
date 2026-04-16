@@ -25,3 +25,4 @@ class MainMenu(StateChart):
     def on_enter_state(self, source:State, target: State, event: str):
         fsm_logger.debug(f"Перешли из {source.id} в {target.id}. Событие: {event}")
 
+

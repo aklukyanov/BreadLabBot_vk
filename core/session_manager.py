@@ -37,17 +37,21 @@ class SessionManager:
 
 
             fsm.current_state_value = current_state # загружаем состояние в фсм
+
             fsm.send(cmd) # делаем шаг в фсм
 
-            new_state_config = list(fsm.configuration_values)  # Превращаем в список
-            session_data["state_config"] = new_state_config  # Обновляем временные данные
 
+            new_state_config = list(fsm.configuration_values)  # Превращаем в список
+
+            session_data["state_config"] = new_state_config  # Обновляем временные данные
+            sm_logger.debug(f"Новый state config: {new_state_config}")
             new_state = new_state_config[-1]  # Берём последний элемент — строку
             await states[new_state].show_screen(event, session_data) # вызываем экран нового состояния
 
             storage.set(key=peer_id, value=session_data)
             test_data = storage.get(key=event.object.peer_id)
             sm_logger.debug(f"Сохранил в storage {test_data}")
+
 
 
     async def handle_message(self, message: Message):
@@ -74,8 +78,11 @@ class SessionManager:
             fsm.current_state_value = current_state  # загружаем состояние в фсм
             fsm.send(cmd)  # делаем шаг в фсм
 
-            new_state_config = list(fsm.configuration_values)  # Превращаем в список
+
+            new_state_config = list(fsm.configuration_values)
+            sm_logger.debug(f"current state values: {fsm.configuration_values}")# Превращаем в список
             session_data["state_config"] = new_state_config  # Обновляем временные данные
+
 
             new_state = new_state_config[-1]  # Берём последний элемент — строку
             await states[new_state].show_screen(message, session_data)  # вызываем экран нового состояния

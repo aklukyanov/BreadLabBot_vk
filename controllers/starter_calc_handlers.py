@@ -1,9 +1,10 @@
+
 from vkbottle.bot import Message
 from vkbottle_types.events.bot_events import MessageEvent
 from controllers.base_state_handler import BaseStateHandler
 from utils.api_client import BreadlabAPIClient
 from utils.keyboards import choose_direction_keyboard, step_back_or_cancel_keyboard, \
-    choosing_starter_proportions_50to100_keyboard, choosing_starter_proportions_100to50_keyboard
+    choosing_starter_proportions_50to100_keyboard, choosing_starter_proportions_100to50_keyboard, error_keyboard
 
 from utils.messages import starter_calc_description, original_proportions_query50, original_proportions_query100, \
     wrong_proportions, target_proportions_query, water_msg50to100, water_msg100to50, starter_calc_result_message
@@ -30,10 +31,10 @@ class ChooseDirectionStateHandler(BaseStateHandler):
 
 
 class WaitingSourdoughWeightStateHandler(BaseStateHandler):
-    def get_message(self, context: dict) -> str:
-        if context["context"]["direction"] == "50to100":
+    def get_message(self, session_data: dict) -> str:
+        if session_data["context"]["direction"] == "50to100":
             return original_proportions_query50
-        if context["context"]["direction"] == "100to50":
+        if session_data["context"]["direction"] == "100to50":
             return original_proportions_query100
 
     def get_keyboard(self, context:dict) -> str:
@@ -41,7 +42,7 @@ class WaitingSourdoughWeightStateHandler(BaseStateHandler):
 
     async def handle_event(self, event:MessageEvent, session_data):
 
-        cmd=event.object.payload["cmd"]
+        cmd = self.get_payload_from_event(event, "cmd")
         if cmd == "back":
             session_data["context"].clear()
             return "back", session_data
@@ -50,8 +51,9 @@ class WaitingSourdoughWeightStateHandler(BaseStateHandler):
             return "to_main", session_data
 
     async def handle_message(self, message:Message, session_data):
+        message=self.get_text_from_message(message)
         try:
-            ingredients = [int(ingredient) for ingredient in message.text.split() if ingredient > 0]
+            ingredients = [int(ingredient) for ingredient in message.split() if int(ingredient) > 0]
             starter, water, flour = ingredients
 
             session_data["context"]["original_starter"] = starter
@@ -67,26 +69,31 @@ class WaitingSourdoughWeightStateHandler(BaseStateHandler):
 
 class ChoosingStarterProportionsStateHandler(BaseStateHandler):
 
-    def get_message(self, context: dict) -> str:
-        if context["context"]["direction"] == "50to100":
+    def get_message(self, session_data: dict) -> str:
+        error=session_data["context"].get("error")
+        if error:
+            return f"❌ {error}"
+        if session_data["context"]["direction"] == "50to100":
             return target_proportions_query.format("100% влажности")
-        if context["context"]["direction"] == "100to50":
+        if session_data["context"]["direction"] == "100to50":
             return target_proportions_query.format("50% влажности")
 
-    def get_keyboard(self, context:dict) -> str:
-        if context["context"]["direction"] == "50to100":
+
+    def get_keyboard(self, session_data:dict) -> str:
+
+        error = session_data["context"].get("error")
+        if error:
+            return error_keyboard("calculate")
+
+        if session_data["context"]["direction"] == "50to100":
             return choosing_starter_proportions_50to100_keyboard
-        if context["context"]["direction"] == "100to50":
+        if session_data["context"]["direction"] == "100to50":
             return choosing_starter_proportions_100to50_keyboard
 
     async def handle_event(self, event:MessageEvent, session_data):
-        cmd=event.object.payload["cmd"]
-        if cmd == "back":
-            return "back", session_data
-        if cmd == "to_main":
-            return "to_main", session_data
+        cmd = self.get_payload_from_event(event, "cmd")
         if cmd == "calculate":
-            starter_proportions=event.object.payload["starter_proportions"]
+            starter_proportions= self.get_payload_from_event(event, "starter_proportions")
             parts = [float(x) for x in starter_proportions.split(':')]
             starter, water, flour = parts
 
@@ -103,16 +110,14 @@ class ChoosingStarterProportionsStateHandler(BaseStateHandler):
             result, error=await BreadlabAPIClient.post("/starter_calc/", request_data)
 
             if error:
-                if request_data["direction"] == "50to100":
-                    keyboard = choosing_starter_proportions_50to100_keyboard
-                if request_data["direction"] == "100to50":
-                    keyboard = choosing_starter_proportions_100to50_keyboard
-
-                await self.show_screen(event, session_data, custom_message=f"❌ {error}", custom_keyboard=keyboard)
+                session_data["context"]["error"] = error
+                await self.show_screen(event, session_data)
                 return None, session_data
             if result:
                 session_data["context"]["result"] = result
                 return "calculate", session_data
+
+        return await super().handle_event(event, session_data)
 
 
 class ShowResultStarterCalcStateHandler(BaseStateHandler):

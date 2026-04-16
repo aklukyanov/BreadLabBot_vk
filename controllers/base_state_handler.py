@@ -6,8 +6,11 @@ from vkbottle_types.events.bot_events import MessageEvent
 
 
 class BaseStateHandler(ABC):
+    def get_text_from_message(self, message:Message) -> str | None:
+        """Платформонезависимое получение текста сообщения."""
+        return message.text
 
-    def get_payload(self, event: MessageEvent | Message, key: str, default=None):
+    def get_payload_from_event(self, event: MessageEvent | Message, key: str, default=None):
         """Платформонезависимое получение параметра из payload/data"""
         # VK MessageEvent (нажатие на кнопку)
         if isinstance(event, MessageEvent):

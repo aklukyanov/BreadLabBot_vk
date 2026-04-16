@@ -48,14 +48,14 @@ class MyRecipesListStateHandler(BaseStateHandler):
         return f"📋 Рецепты — страница {page} из {total}"
 
     async def handle_event(self, event, session_data):
-        cmd = self.get_payload(event, "cmd")
+        cmd = self.get_payload_from_event(event, "cmd")
         if cmd == "show_recipes_list":
-            page = self.get_payload(event,"page", 1)
+            page = self.get_payload_from_event(event, "page", 1)
             session_data["context"]["page"] = page
             await self.show_screen(event, session_data)
             return None, session_data
         if cmd == "open_view_recipe":
-            recipe_id = self.get_payload(event, "recipe_id")
+            recipe_id = self.get_payload_from_event(event, "recipe_id")
             session_data["context"]["recipe_id"] = recipe_id
 
         return await super().handle_event(event, session_data)
