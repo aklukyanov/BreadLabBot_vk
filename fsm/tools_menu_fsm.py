@@ -1,4 +1,6 @@
 from statemachine import State
+
+from fsm.load_recipe_fsm import LoadRecipeFSM
 from logger import fsm_logger
 
 
@@ -21,6 +23,19 @@ class StarterCalcFSM(State.Compound):
 
     )
 
+    def on_enter_state(self, source:State, target: State, event: str):
+        fsm_logger.debug(f"Перешли из {source.id} в {target.id}. Событие: {event}")
+
+
+class ProportionsCalcFSM(State.Compound):
+    load_recipe_menu=LoadRecipeFSM
+    waiting_multiplier=State()
+    show_result_proportions_calc=State()
+
+    enter_recipe=load_recipe_menu.to(waiting_multiplier)
+    enter_multiplier=waiting_multiplier.to(show_result_proportions_calc)
+
+    back = show_result_proportions_calc.to(waiting_multiplier) | waiting_multiplier.to(load_recipe_menu.choose_recipe)
 
 
     def on_enter_state(self, source:State, target: State, event: str):
@@ -31,7 +46,7 @@ class ToolsMenuFSM(State.Compound):
 
     tools=State(initial=True)
     starter_calc=StarterCalcFSM
-    proportions_calc=State()
+    proportions_calc=ProportionsCalcFSM
 
     open_starter_calc=tools.to(starter_calc)
     open_proportions_calc = tools.to(proportions_calc)

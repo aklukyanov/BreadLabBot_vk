@@ -54,9 +54,9 @@ tools_menu_keyboard = (
     Keyboard(inline=True)
     .add(Callback("🧮 Калькулятор закваски", payload={"cmd": "open_starter_calc"}))
     .row()
-    .add(Callback("⚖️ Расчет пропорций", payload={"cmd": "proportions_calc"}))
+    .add(Callback("⚖️ Расчет пропорций", payload={"cmd": "open_proportions_calc"}))
     .row()
-    .add(Callback("💧 Трекер гидратации", payload={"cmd": "hydration_tracker"}))
+    .add(Callback("💧 Трекер гидратации", payload={"cmd": "open_hydration_tracker"}))
     .row()
     .add(Callback("◀️ Назад", payload={"cmd": "back"}))
     .row()
@@ -121,18 +121,25 @@ back_to_recipes_keyboard = (
     .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
 ).get_json()
 
-def edit_recipe_keyboard(recipe_id: str) -> str:
-    """Клавиатура для экрана редактирования рецепта"""
-    return (
-        Keyboard(inline=True)
-        .add(Callback("✏️ Редактировать", payload={"cmd": "edit_recipe", "recipe_id": recipe_id}))
-        .row()
-        .add(Callback("🗑 Удалить", payload={"cmd": "open_delete_recipe", "recipe_id": recipe_id}))
-        .row()
-        .add(Callback("◀️ Назад", payload={"cmd": "back"}))
-        .row()
-        .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
-    ).get_json()
+def view_recipe_keyboard(recipe_id: str, mode) -> str:
+    """Клавиатура для экрана отображения рецепта"""
+    keyboard= Keyboard(inline=True)
+    if mode=="edit_recipe":
+        keyboard.add(Callback("✏️ Редактировать", payload={"cmd": "edit_recipe", "recipe_id": recipe_id}))
+        keyboard.row()
+        keyboard.add(Callback("🗑 Удалить", payload={"cmd": "open_delete_recipe", "recipe_id": recipe_id}))
+        keyboard.row()
+        keyboard.add(Callback("◀️ Назад", payload={"cmd": "back"}))
+        keyboard.row()
+        keyboard.add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+        return keyboard.get_json()
+    if mode=="proportions_calc":
+        keyboard.add(Callback("◀️ Назад", payload={"cmd": "back"}))
+        keyboard.row()
+        keyboard.add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+        return keyboard.get_json()
+
+
 
 
 def approve_keyboard(yes_cmd: str, no_cmd: str) -> str:
@@ -166,20 +173,45 @@ def recipes_keyboard(recipes, current_page, has_prev, has_next):
     keyboard.row()
     keyboard.add(Callback("➕ Добавить рецепт", payload={"cmd": "add_recipe"}))
     keyboard.add(Callback("🏠 В главное меню", payload={"cmd": 'to_main'}))
-
-
     return keyboard.get_json()
 
-def my_recipes_keyboard (mode=''):
-        keyboard=Keyboard(inline=True)
-        keyboard.add(Callback("📋 Список рецептов", payload={"cmd": "my_recipes_list", "mode":mode}))
+
+
+def recipes_keyboard_proportions_calc(recipes, current_page, has_prev, has_next):
+    # создает клавиатуру из рецептов пользователя
+    keyboard = Keyboard(inline=True)
+    # Кнопки рецептов (максимум 4)
+    for recipe in recipes:
+        title = recipe['recipe']['data']['title']
+        recipe_id = recipe['id']
+
+        keyboard.add(Callback(title, payload={"cmd": "enter_recipe", "recipe_id": recipe_id}))
         keyboard.row()
-        keyboard.add(Callback("➕ Добавить новый", payload={"cmd": "add_recipe", "mode":mode}))
-        keyboard.row()
-        keyboard.add(Callback("⬅️ Назад", payload={"cmd": 'to_main'}))
-        keyboard.row()
-        keyboard.add(Callback("🏠 В главное меню", payload={"cmd": 'to_main'}))
-        return keyboard.get_json()
+
+    # Навигация (2 кнопки)
+    if has_prev:
+        keyboard.add(
+            Callback("◀️ Назад", payload={"cmd": "show_recipes_list", "page": current_page - 1}))
+
+    if has_next:
+        keyboard.add(
+            Callback("Вперёд ▶️", payload={"cmd": "show_recipes_list", "page": current_page + 1}))
+
+    keyboard.row()
+    keyboard.add(Callback("◀️ Назад", payload={"cmd": "back"}))
+    keyboard.add(Callback("🏠 В главное меню", payload={"cmd": 'to_main'}))
+    return keyboard.get_json()
+
+load_recipe_keyboard = (
+    Keyboard(inline=True)
+    .add(Callback("📋 Список рецептов", payload={"cmd": "open_choose_recipe"}))
+    .row()
+    .add(Callback("➕ Добавить новый", payload={"cmd": "open_load_recipe"}))
+    .row()
+    .add(Callback("⬅️ Назад", payload={"cmd": "back"}))  # 👈 back вместо to_main
+    .row()
+    .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+).get_json()
 
 
 def edit_recipe_approve_keyboard(recipe_id, mode=None):

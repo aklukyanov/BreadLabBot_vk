@@ -1,3 +1,5 @@
+from typing import Tuple, Optional
+
 import aiohttp
 
 from logger import api_client_logger
@@ -90,3 +92,11 @@ class BreadlabAPIClient:
         except Exception as e:
             api_client_logger.error(f"API error [{cls.BASE_URL}/recipes/{recipe_id}/delete/]: {e}")
             return None, f"Сервер недоступен."
+
+    @classmethod
+    async def multiply_recipe(cls, multiplier: int, recipe: dict) -> Tuple[Optional[dict], Optional[str]]:
+        """Умножить рецепт на множитель."""
+        return await cls.post(
+            "/recipe_multiply/",
+            {"multiplier": multiplier, "recipe": recipe}
+        )
