@@ -31,15 +31,19 @@ class BreadlabAPIClient:
             async with session.post(
                     f"{cls.BASE_URL}{endpoint}",
                     json=request_data,
-                    timeout=10
+                    timeout=60
             ) as response:
-                api_client_logger.info(f"API response [{cls.BASE_URL}{endpoint}]: {response}")
+                response_data = await response.json()
+                api_client_logger.info(
+                    f"API response [{cls.BASE_URL}{endpoint}]: status={response.status}, body={response_data}")
                 if response.status == 200:
+                    return response_data, None
+                elif response.status == 201:
                     return await response.json(), None
                 else:
                     return None, "Ошибка сервера."
         except Exception as e:
-            api_client_logger.error(f"API error [{cls.BASE_URL}{endpoint}]: {e}")
+            api_client_logger.error(f"API error [{cls.BASE_URL}{endpoint}]: {type(e).__name__}: {e}")
             return None, f"Сервер недоступен."
 
     @classmethod
@@ -100,3 +104,30 @@ class BreadlabAPIClient:
             "/recipe_multiply/",
             {"multiplier": multiplier, "recipe": recipe}
         )
+    @classmethod
+    async def recognize_recipe_text(cls, recipe:str):
+        request={"recipe": recipe}
+        return await cls.post(
+            "/recognize_text/",
+            request)
+
+    @classmethod
+    async def save_recipe(cls, user_id: str, recipe_data: dict, parent_id: int = None):
+        """Сохранить рецепт. Возвращает (data, error)."""
+        request_data = {
+            "user_id": user_id,
+            "parent_id": parent_id,
+            "recipe": {"data": recipe_data}
+        }
+        return await cls.post("/recipes/", request_data)
+
+    @classmethod
+    async def check_recipe_exists(cls, user_id: str, title: str) -> Tuple[bool, Optional[str]]:
+        result, error = await cls.get(
+            "/recipe_check_exists/",
+            params={"user_id": user_id, "title": title}
+        )
+        if error:
+            return False, error
+        return result.get("exists", False), None
+

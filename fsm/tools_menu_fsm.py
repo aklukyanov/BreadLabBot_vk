@@ -1,6 +1,6 @@
 from statemachine import State
 
-from fsm.load_recipe_fsm import LoadRecipeFSM
+from fsm.load_recipe_fsm import LoadRecipeProportionsCalcFSM
 from logger import fsm_logger
 
 
@@ -28,14 +28,14 @@ class StarterCalcFSM(State.Compound):
 
 
 class ProportionsCalcFSM(State.Compound):
-    load_recipe_menu=LoadRecipeFSM
+    load_recipe_menu_proportions_calc=LoadRecipeProportionsCalcFSM
     waiting_multiplier=State()
     show_result_proportions_calc=State()
 
-    enter_recipe=load_recipe_menu.to(waiting_multiplier)
+    enter_recipe=load_recipe_menu_proportions_calc.to(waiting_multiplier)
     enter_multiplier=waiting_multiplier.to(show_result_proportions_calc)
 
-    back = show_result_proportions_calc.to(waiting_multiplier) | waiting_multiplier.to(load_recipe_menu.choose_recipe)
+    back = show_result_proportions_calc.to(waiting_multiplier) | waiting_multiplier.to(load_recipe_menu_proportions_calc.choose_recipe_proportions_calc)
 
 
     def on_enter_state(self, source:State, target: State, event: str):

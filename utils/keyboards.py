@@ -9,7 +9,7 @@ def error_keyboard(retry_cmd: str) -> str:
     """
     return (
         Keyboard(inline=True)
-        .add(Callback("🔄 Попробовать ещё раз", payload={"cmd": retry_cmd}))
+        .add(Callback("🔄 Отправить заново", payload={"cmd": retry_cmd}))
         .row()
         .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
         .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
@@ -142,6 +142,9 @@ def view_recipe_keyboard(recipe_id: str, mode) -> str:
 
 
 
+
+
+
 def approve_keyboard(yes_cmd: str, no_cmd: str) -> str:
     return (
         Keyboard(inline=True)
@@ -171,7 +174,7 @@ def recipes_keyboard(recipes, current_page, has_prev, has_next):
             Callback("Вперёд ▶️", payload={"cmd": "show_recipes_list", "page": current_page + 1}))
 
     keyboard.row()
-    keyboard.add(Callback("➕ Добавить рецепт", payload={"cmd": "add_recipe"}))
+    keyboard.add(Callback("➕ Добавить рецепт", payload={"cmd": "open_add_recipe"}))
     keyboard.add(Callback("🏠 В главное меню", payload={"cmd": 'to_main'}))
     return keyboard.get_json()
 
@@ -204,9 +207,9 @@ def recipes_keyboard_proportions_calc(recipes, current_page, has_prev, has_next)
 
 load_recipe_keyboard = (
     Keyboard(inline=True)
-    .add(Callback("📋 Список рецептов", payload={"cmd": "open_choose_recipe"}))
+    .add(Callback("📋 Список рецептов", payload={"cmd": "open_choose_recipe_proportions_calc"}))
     .row()
-    .add(Callback("➕ Добавить новый", payload={"cmd": "open_load_recipe"}))
+    .add(Callback("➕ Добавить новый", payload={"cmd": "open_load_recipe_proportions_calc"}))
     .row()
     .add(Callback("⬅️ Назад", payload={"cmd": "back"}))  # 👈 back вместо to_main
     .row()
@@ -235,12 +238,29 @@ def edit_recipe_approve_keyboard(recipe_id, mode=None):
         return keyboard.get_json()
 
 
-def approving_keyboard(approve_cmd, step_back_cmd, to_main_cmd, mode=None):
+def approving_keyboard(approve_cmd: str, restart_cmd: str, step_back_cmd: str, to_main_cmd: str) -> str:
     return (
         Keyboard(inline=True)
-        .add(Callback("✅ Всё верно", payload={"cmd": approve_cmd, "mode":mode}))
+        .add(Callback("✅ Всё верно", payload={"cmd": approve_cmd}))
         .row()
-        .add(Callback("⬅️ Назад", payload={"cmd": step_back_cmd,"mode":mode}))
+        .add(Callback("🔄 Начать заново", payload={"cmd": restart_cmd}))
         .row()
-        .add(Callback("🏠 В главное меню", payload={"cmd": to_main_cmd,"mode":mode}))
+        .add(Callback("⬅️ Назад", payload={"cmd": step_back_cmd}))
+        .row()
+        .add(Callback("🏠 В главное меню", payload={"cmd": to_main_cmd}))
     ).get_json()
+
+save_or_cancel_keyboard = (
+    Keyboard(inline=True)
+    .add(Callback("💾 Сохранить", payload={"cmd": "confirm_save"}))
+    .row()
+    .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
+    .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+).get_json()
+
+to_my_recipes_or_main_keyboard = (
+    Keyboard(inline=True)
+    .add(Callback("📋 В мои рецепты", payload={"cmd": "back"}))
+    .row()
+    .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+).get_json()

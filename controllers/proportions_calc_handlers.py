@@ -12,7 +12,7 @@ from utils.keyboards import load_recipe_keyboard, recipes_keyboard, recipes_keyb
 from utils.messages import proportions_calc_description
 
 
-class LoadRecipeStateHandler(BaseStateHandler):
+class LoadRecipeProportionsCalcStateHandler(BaseStateHandler):
 
     async def show_screen(self, event: MessageEvent | Message, session_data: dict):
         session_data["context"].clear()
@@ -24,7 +24,7 @@ class LoadRecipeStateHandler(BaseStateHandler):
     def get_keyboard(self, session_data: dict) -> str:
         return load_recipe_keyboard
 
-class ChooseRecipeStateHandler(BaseMyRecipesListStateHandler):
+class ChooseRecipeProportionsCalcStateHandler(BaseMyRecipesListStateHandler):
     def get_keyboard(self, session_data: dict) -> str|None:
 
         error = session_data["context"].get("error")

@@ -63,8 +63,6 @@ class SessionManager:
             storage.set(key=peer_id, value=session_data)
             test_data = storage.get(key=event.object.peer_id)
             sm_logger.debug(f"Сохранил в storage {test_data}")
-            print(fsm._graph().to_string())
-
 
     async def handle_message(self, message: Message):
         sm_logger.debug(f"Принял сообщение: {message}")

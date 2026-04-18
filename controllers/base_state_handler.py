@@ -4,7 +4,6 @@ from typing import Tuple, Optional
 from vkbottle.bot import Message
 from vkbottle_types.events.bot_events import MessageEvent
 
-
 class BaseStateHandler(ABC):
     def get_text_from_message(self, message:Message) -> str | None:
         """Платформонезависимое получение текста сообщения."""

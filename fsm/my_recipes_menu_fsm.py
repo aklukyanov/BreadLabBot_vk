@@ -6,12 +6,12 @@ from logger import fsm_logger
 class MyRecipesMenuFSM(State.Compound):
     my_recipes_list=State(initial=True)
     view_recipe=State()
-    add_recipe=AddRecipeFSM()
+    add_recipe=AddRecipeFSM
     edit_recipe=State()
     delete_recipe=State()
 
     open_view_recipe=my_recipes_list.to(view_recipe)
-    open_add_recipe=my_recipes_list.to(add_recipe)
+    open_add_recipe = my_recipes_list.to(add_recipe)
     open_edit_recipe=view_recipe.to(edit_recipe)
     open_delete_recipe=view_recipe.to(delete_recipe)
     open_my_recipes_list=delete_recipe.to(my_recipes_list)
