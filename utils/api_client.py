@@ -66,6 +66,39 @@ class BreadlabAPIClient:
             return None, f"Сервер недоступен."
 
     @classmethod
+    async def patch(cls, endpoint: str, request_data: dict):
+        """PATCH-запрос к API."""
+        session = cls.get_or_create_session()
+        try:
+            api_client_logger.info(f"PATCH [{cls.BASE_URL}{endpoint}]: {request_data}")
+            async with session.patch(
+                    f"{cls.BASE_URL}{endpoint}",
+                    json=request_data,
+                    timeout=10
+            ) as response:
+                response_data = await response.json()
+                api_client_logger.info(
+                    f"API response [{cls.BASE_URL}{endpoint}]: status={response.status}, body={response_data}"
+                )
+                if response.status in (200, 201):
+                    return response_data, None
+                else:
+                    return None, f"Ошибка сервера (код {response.status})"
+        except Exception as e:
+            api_client_logger.error(f"API error [PATCH {endpoint}]: {type(e).__name__}: {e}")
+            return None, "Сервер недоступен."
+
+    @classmethod
+    async def patch_recipe(cls, recipe_id: str, recipe_data: dict):
+        """Обновить существующий рецепт (PATCH)."""
+        request_data = {
+            "recipe": {
+                "data": recipe_data
+            }
+        }
+        return await cls.patch(f"/recipes/{recipe_id}/update/", request_data)
+
+    @classmethod
     async def get_user_recipes(cls, external_id: str, page: int = 1):
         """Получить рецепты пользователя с пагинацией"""
         return await cls.get(

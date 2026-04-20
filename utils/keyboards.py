@@ -24,24 +24,11 @@ def step_back_or_cancel_keyboard(step_back_cmd, cancel_cmd):
     ).get_json()
 
 
-def rerun_function_keyboard(rerun_cmd, to_main_cmd, rerun_func):
-    keyboard=Keyboard(inline=True)
-    if rerun_func=='starter_calc':
-            keyboard.add(Callback("🔄 Посчитать заново", payload={"cmd": rerun_cmd}))
-    if rerun_func=='edit_recipe':
-        keyboard.add(Callback("📋 Список рецептов", payload={"cmd": rerun_cmd}))
-    if rerun_func == 'proportions_calc':
-        keyboard.add(Callback("🔄 Посчитать заново", payload={"cmd": rerun_cmd}))
-
-    keyboard.row()
-    keyboard.add(Callback("🏠 В главное меню", payload={"cmd": to_main_cmd})).get_json()
-    return keyboard
 
 #Главное меню
 main_menu_keyboard = (
     Keyboard(inline=True)
-    .add(Callback("🎯 Новая выпечка", payload={"cmd": "new_bake"}))
-    .row()
+
     .add(Callback("📋 Мои рецепты", payload={"cmd": "my_recipes_menu"}))
     .row()
     .add(Callback("🔧 Инструменты", payload={"cmd": "tools"}))
@@ -55,8 +42,6 @@ tools_menu_keyboard = (
     .add(Callback("🧮 Калькулятор закваски", payload={"cmd": "open_starter_calc"}))
     .row()
     .add(Callback("⚖️ Расчет пропорций", payload={"cmd": "open_proportions_calc"}))
-    .row()
-    .add(Callback("💧 Трекер гидратации", payload={"cmd": "open_hydration_tracker"}))
     .row()
     .add(Callback("◀️ Назад", payload={"cmd": "back"}))
     .row()
@@ -125,9 +110,9 @@ def view_recipe_keyboard(recipe_id: str, mode) -> str:
     """Клавиатура для экрана отображения рецепта"""
     keyboard= Keyboard(inline=True)
     if mode=="edit_recipe":
-        keyboard.add(Callback("✏️ Редактировать", payload={"cmd": "edit_recipe", "recipe_id": recipe_id}))
+        keyboard.add(Callback("✏️ Редактировать", payload={"cmd": "open_edit_existing_recipe"}))
         keyboard.row()
-        keyboard.add(Callback("🗑 Удалить", payload={"cmd": "open_delete_recipe", "recipe_id": recipe_id}))
+        keyboard.add(Callback("🗑 Удалить", payload={"cmd": "open_delete_recipe"}))
         keyboard.row()
         keyboard.add(Callback("◀️ Назад", payload={"cmd": "back"}))
         keyboard.row()
@@ -209,7 +194,7 @@ load_recipe_keyboard = (
     Keyboard(inline=True)
     .add(Callback("📋 Список рецептов", payload={"cmd": "open_choose_recipe_proportions_calc"}))
     .row()
-    .add(Callback("➕ Добавить новый", payload={"cmd": "open_load_recipe_proportions_calc"}))
+    .add(Callback("➕ Добавить новый", payload={"cmd": "open_add_recipe_proportions_calc"}))
     .row()
     .add(Callback("⬅️ Назад", payload={"cmd": "back"}))  # 👈 back вместо to_main
     .row()
@@ -238,16 +223,16 @@ def edit_recipe_approve_keyboard(recipe_id, mode=None):
         return keyboard.get_json()
 
 
-def approving_keyboard(approve_cmd: str, restart_cmd: str, step_back_cmd: str, to_main_cmd: str) -> str:
+def approving_edit_keyboard(approve_cmd: str, restart_cmd: str) -> str:
     return (
         Keyboard(inline=True)
         .add(Callback("✅ Всё верно", payload={"cmd": approve_cmd}))
         .row()
         .add(Callback("🔄 Начать заново", payload={"cmd": restart_cmd}))
         .row()
-        .add(Callback("⬅️ Назад", payload={"cmd": step_back_cmd}))
+        .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
         .row()
-        .add(Callback("🏠 В главное меню", payload={"cmd": to_main_cmd}))
+        .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
     ).get_json()
 
 save_or_cancel_keyboard = (
@@ -257,6 +242,36 @@ save_or_cancel_keyboard = (
     .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
     .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
 ).get_json()
+
+save_choice_keyboard = (
+    Keyboard(inline=True)
+    .add(Callback("✨ Сохранить как новый", payload={"cmd": "save_as_new"}))
+    .row()
+    .add(Callback("📎 Сохранить как версию", payload={"cmd": "save_as_version"}))
+    .row()
+    .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
+    .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+).get_json()
+
+update_existing_recipe_keyboard = (
+    Keyboard(inline=True)
+    .add(Callback("🔄 Обновить существующий", payload={"cmd": "update_existing_recipe"}))
+    .row()
+    .row()
+    .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
+    .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+).get_json()
+
+confirm_update_existing_recipe_keyboard = (
+    Keyboard(inline=True)
+    .add(Callback("🔄 Подтвердить обновление", payload={"cmd": "confirm_update_existing_recipe"}))
+    .row()
+    .row()
+    .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
+    .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+).get_json()
+
+
 
 to_my_recipes_or_main_keyboard = (
     Keyboard(inline=True)

@@ -48,9 +48,6 @@ class ChooseRecipeProportionsCalcStateHandler(BaseMyRecipesListStateHandler):
             return "enter_recipe", session_data
         return await super().handle_event(event, session_data)
 
-
-
-
 class WaitingMultiplierStateHandler(BaseViewRecipeStateHandler):
     mode = "proportions_calc"
 

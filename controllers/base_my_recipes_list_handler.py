@@ -5,7 +5,6 @@ from utils.keyboards import recipes_keyboard, error_keyboard
 
 class BaseMyRecipesListStateHandler(BaseStateHandler):
     async def show_screen(self, event, session_data, custom_message=None, custom_keyboard=None):
-
         page = session_data["context"].get("page", 1)
         user_id = session_data["peer_id"]
 
@@ -53,9 +52,6 @@ class BaseMyRecipesListStateHandler(BaseStateHandler):
             await self.show_screen(event, session_data)
             return None, session_data
         if cmd == "open_view_recipe":
-            recipe_id = self.get_payload_from_event(event, "recipe_id")
-            session_data["context"]["recipe_id"] = recipe_id
-        if cmd == "open_view_recipe_load":
             recipe_id = self.get_payload_from_event(event, "recipe_id")
             session_data["context"]["recipe_id"] = recipe_id
 

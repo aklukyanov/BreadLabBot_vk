@@ -1,5 +1,4 @@
 from statemachine import State
-
 from logger import fsm_logger
 
 
@@ -7,7 +6,8 @@ from logger import fsm_logger
 class LoadRecipeProportionsCalcFSM(State.Compound):
     load_recipe_proportions_calc=State(initial=True)
     choose_recipe_proportions_calc=State(final=True)
-    add_recipe_proportions_calc=State(final=True)
+    add_recipe_proportions_calc=State()
+
 
     open_choose_recipe_proportions_calc=load_recipe_proportions_calc.to(choose_recipe_proportions_calc)
     open_add_recipe_proportions_calc=load_recipe_proportions_calc.to(add_recipe_proportions_calc)

@@ -1,7 +1,9 @@
 from controllers.delete_recipe import DeleteRecipeStateHandler
 from controllers.main_menu_handlers import MainMenuStateHandler, ToolsMenuStateHandler
-from controllers.my_recipes_menu_handlers import MyRecipesListStateHandler, WaitingUserRecipeStateHandler, \
-        EditUserRecipeStateHandler, SaveUserRecipeStateHandler, SaveSuccessStateHandler
+from controllers.my_recipes_menu_handlers import MyRecipesListStateHandler, WaitingUserRecipeStateHandler
+from controllers.save_recipe_handlers import SaveAddedRecipeStateHandler, SaveEditedExistingRecipesStateHandler, \
+        SaveSuccessStateHandler
+from controllers.base_edit_recipe_handler import EditAddedRecipeStateHandler, EditExistingRecipeStateHandler
 from controllers.proportions_calc_handlers import LoadRecipeProportionsCalcStateHandler, ChooseRecipeProportionsCalcStateHandler, \
         WaitingMultiplierStateHandler, ShowResultProportionsCalcStateHandler
 from controllers.starter_calc_handlers import ChooseDirectionStateHandler, WaitingSourdoughWeightStateHandler, \
@@ -22,6 +24,9 @@ states={"main":MainMenuStateHandler(),
         "waiting_multiplier":WaitingMultiplierStateHandler(),
         "show_result_proportions_calc":ShowResultProportionsCalcStateHandler(),
         "waiting_user_recipe":WaitingUserRecipeStateHandler(),
-        "edit_user_recipe":EditUserRecipeStateHandler(),
-        "save_user_recipe":SaveUserRecipeStateHandler(),
-        "save_success":SaveSuccessStateHandler(),}
+        "edit_added_recipe":EditAddedRecipeStateHandler(),
+        "edit_existing_recipe":EditExistingRecipeStateHandler(),
+        "save_added_recipe":SaveAddedRecipeStateHandler(),
+        "save_edited_existing_recipe":SaveEditedExistingRecipesStateHandler(),
+        "save_success_edited_existing_recipe":SaveSuccessStateHandler(),
+        "save_success_added_recipe":SaveSuccessStateHandler(),}
