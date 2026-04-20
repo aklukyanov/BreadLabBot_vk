@@ -33,7 +33,7 @@ main_menu_keyboard = (
     .row()
     .add(Callback("🔧 Инструменты", payload={"cmd": "tools"}))
     .row()
-    .add(Callback("ℹ️ О проекте", payload={"cmd": "about"}))
+    .add(Callback("ℹ️ О проекте", payload={"cmd": "open_about"}))
 ).get_json()
 
 #Инструменты
@@ -106,7 +106,7 @@ back_to_recipes_keyboard = (
     .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
 ).get_json()
 
-def view_recipe_keyboard(recipe_id: str, mode) -> str:
+def view_recipe_keyboard(mode) -> str:
     """Клавиатура для экрана отображения рецепта"""
     keyboard= Keyboard(inline=True)
     if mode=="edit_recipe":
@@ -125,7 +125,10 @@ def view_recipe_keyboard(recipe_id: str, mode) -> str:
         return keyboard.get_json()
 
 
-
+back_only_keyboard = (
+    Keyboard(inline=True)
+    .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
+).get_json()
 
 
 

@@ -9,21 +9,36 @@ from utils.keyboards import error_keyboard, view_recipe_keyboard
 
 class BaseViewRecipeStateHandler(BaseStateHandler):
     mode=None #переопределим в наследниках
-    async def show_screen(self, event: MessageEvent | Message, session_data: dict):
 
+    async def show_screen(self, event: MessageEvent | Message, session_data: dict):
+        # 1. Пытаемся получить recipe_id
         recipe_id = session_data["context"].get("recipe_id")
 
-        result, error = await BreadlabAPIClient.get_recipe(recipe_id=recipe_id)
-        if error:
-            session_data["context"]["error"] = error
-            session_data["context"]["recipes"] = []
+        if recipe_id:
+            # Случай А: Сохранённый рецепт — загружаем с сервера
+            result, error = await BreadlabAPIClient.get_recipe(recipe_id=recipe_id)
+            if error:
+                session_data["context"]["error"] = error
+            else:
+                session_data["context"]["recipe"] = result['recipe']["data"]
+                session_data["context"]["error"] = None
         else:
-            # 👇 Парсим и сохраняем в context
-            session_data["context"]["error"] = None
-            session_data["context"]["recipe"] = result['recipe']["data"]
-            session_data["context"]["recipe_id"] = recipe_id
+            # Случай Б: Новый/загруженный рецепт — берём из контекста
+            recipe = (
+                    session_data["context"].get("recipe_to_save") or
+                    session_data["context"].get("recipe_to_edit") or
+                    session_data["context"].get("recipe")
+            )
+            if recipe:
+                # Убедимся, что он лежит в едином ключе `recipe`
+                session_data["context"]["recipe"] = recipe
+                session_data["context"]["error"] = None
+            else:
+                session_data["context"]["error"] = "Рецепт не найден"
 
+        # 2. Вызываем родительский show_screen, который возьмёт данные из `recipe` и `error`
         await super().show_screen(event, session_data)
+
 
     def get_message(self, session_data: dict) -> str:
         error = session_data["context"].get("error")
@@ -37,7 +52,10 @@ class BaseViewRecipeStateHandler(BaseStateHandler):
     def get_keyboard(self, session_data:dict) -> str|None:
         error = session_data["context"].get("error")
         if error:
-            return error_keyboard("open_view_recipe")
+            return error_keyboard(self._get_retry_command())
 
-        recipe_id=session_data["context"]["recipe_id"]
-        return view_recipe_keyboard(recipe_id, self.mode)
+        return view_recipe_keyboard(self.mode)
+
+    def _get_retry_command(self) -> str:
+        """Команда для кнопки 'Отправить заново'. Переопределяется в наследниках."""
+        return "open_view_recipe"

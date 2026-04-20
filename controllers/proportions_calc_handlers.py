@@ -51,6 +51,9 @@ class ChooseRecipeProportionsCalcStateHandler(BaseMyRecipesListStateHandler):
 class WaitingMultiplierStateHandler(BaseViewRecipeStateHandler):
     mode = "proportions_calc"
 
+    def _get_retry_command(self) -> str:
+        return "enter_multiplier"
+
     def get_message(self, session_data: dict) -> str:
         # Берём базовое сообщение (рецепт)
         base_message = super().get_message(session_data)
@@ -99,3 +102,4 @@ class ShowResultProportionsCalcStateHandler(BaseStateHandler):
 
     async def show_screen(self, event, session_data):
         await super().show_screen(event, session_data)
+

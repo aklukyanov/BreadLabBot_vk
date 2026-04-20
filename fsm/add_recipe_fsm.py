@@ -1,6 +1,5 @@
 from statemachine import State, StateMachine
 
-
 class AddRecipeFSM(State.Compound):
     waiting_user_recipe = State(initial=True)
     edit_added_recipe = State()
@@ -14,4 +13,9 @@ class AddRecipeFSM(State.Compound):
     back = edit_added_recipe.to(waiting_user_recipe) | save_added_recipe.to(edit_added_recipe)
 
 
+class AddRecipeProportionsCalcFSM(State.Compound):
+    waiting_user_recipe_proportions_calc = State(initial=True)
+    edit_added_recipe_proportions_calc = State()
+    open_edit_added_recipe = waiting_user_recipe_proportions_calc.to(edit_added_recipe_proportions_calc)
 
+    back = edit_added_recipe_proportions_calc.to(waiting_user_recipe_proportions_calc)

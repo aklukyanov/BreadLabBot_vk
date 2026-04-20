@@ -105,7 +105,13 @@ class EditAddedRecipeStateHandler(BaseEditRecipeStateHandler):
         exists=session_data["context"].get("exists")
         if exists:
             return error_keyboard("edit_recipe_with_llm")
-        return approving_edit_keyboard("open_save_added_recipe", "rerun_edit_added_recipe")
+
+        state_config=session_data["state_config"]
+        if 'load_recipe_proportions_calc' in state_config:
+            return approving_edit_keyboard("enter_recipe", "rerun_edit_added_recipe")
+        if 'my_recipes_list' in state_config:
+            return approving_edit_keyboard("open_save_added_recipe", "rerun_edit_added_recipe")
+
 
     async def handle_event(self, event: MessageEvent, session_data: dict):
         cmd = self.get_payload_from_event(event, "cmd")
@@ -148,7 +154,6 @@ class EditExistingRecipeStateHandler(BaseEditRecipeStateHandler):
             return error_keyboard("edit_recipe_with_llm")
 
         exists = session_data["context"].get("exists")
-
         if exists:
             return update_existing_recipe_keyboard
 
@@ -187,3 +192,4 @@ class EditExistingRecipeStateHandler(BaseEditRecipeStateHandler):
                 return cmd, session_data
 
         return await super().handle_event(event, session_data)
+

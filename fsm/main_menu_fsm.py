@@ -14,11 +14,13 @@ class MainMenu(StateChart):
     main=State(initial=True)
     tools_menu=ToolsMenuFSM
     my_recipes_menu=MyRecipesMenuFSM
+    about=State()
 
     open_tools=main.to(tools_menu)
     open_my_recipes_menu=main.to(my_recipes_menu)
+    open_about=main.to(about)
 
-    back=tools_menu.to(main) | my_recipes_menu.to(main)
+    back=tools_menu.to(main) | my_recipes_menu.to(main) | about.to(main)
 
     to_main=tools_menu.to(main) | my_recipes_menu.to(main)
 
