@@ -2,7 +2,7 @@ from vkbottle_types.events.bot_events import MessageEvent
 from controllers.base_state_handler import BaseStateHandler
 from utils.api_client import BreadlabAPIClient
 from utils.keyboards import approve_keyboard, error_keyboard, back_to_recipes_keyboard
-from utils.messages import delete_recipe_approve_message
+from utils.messages import delete_recipe_approve_message, success_delete_message
 
 
 class DeleteRecipeStateHandler(BaseStateHandler):
@@ -21,7 +21,7 @@ class DeleteRecipeStateHandler(BaseStateHandler):
         if error:
             return f"❌ {error}"
         if deleted:
-            return f"✅ Рецепт успешно удален!"
+            return success_delete_message
 
         return delete_recipe_approve_message
 

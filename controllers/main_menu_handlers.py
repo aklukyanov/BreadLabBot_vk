@@ -1,7 +1,7 @@
 from vkbottle_types.events.bot_events import MessageEvent
 from controllers.base_state_handler import BaseStateHandler
 from utils.keyboards import main_menu_keyboard, tools_menu_keyboard, back_only_keyboard
-from utils.messages import about_breadlab
+from utils.messages import about_breadlab, main_menu_title, tools_menu_title
 
 
 class MainMenuStateHandler(BaseStateHandler):
@@ -16,7 +16,7 @@ class MainMenuStateHandler(BaseStateHandler):
         await super().show_screen(event, session_data)
 
     def get_message(self, context: dict) -> str:
-        return "🏠 Главное меню"
+        return main_menu_title
 
     def get_keyboard(self, context: dict) -> str:
         return main_menu_keyboard
@@ -35,7 +35,7 @@ class ToolsMenuStateHandler(BaseStateHandler):
     """Меню выбора инструментов: калькулятор закваски и расчёт пропорций."""
 
     def get_message(self, session_data: dict) -> str:
-        return "🔧 Инструменты"
+        return tools_menu_title
 
     def get_keyboard(self, session_data: dict) -> str:
         return tools_menu_keyboard

@@ -7,6 +7,7 @@ from controllers.my_recipes_list_handler import BaseMyRecipesListStateHandler
 from controllers.base_state_handler import BaseStateHandler
 from utils.api_client import BreadlabAPIClient
 from utils.keyboards import step_back_or_cancel_keyboard, error_keyboard
+from utils.messages import waiting_user_recipe_default_message, photo_parsing_error_message
 
 
 class MyRecipesListStateHandler(BaseMyRecipesListStateHandler):
@@ -25,9 +26,9 @@ class WaitingUserRecipeStateHandler(BaseStateHandler):
     def get_message(self, session_data: dict) -> str:
         error = session_data["context"].get("error")
         if error:
-            return f"❌ {error}\n\nПришлите сообщение с текстом или фото рецепта."
+            return f"❌ {error}\n\n{waiting_user_recipe_default_message}"
 
-        return "Пришлите сообщение с текстом или фото рецепта."
+        return waiting_user_recipe_default_message
 
     def get_keyboard(self, session_data: dict):
         error = session_data["context"].get("error")
@@ -79,7 +80,7 @@ class WaitingUserRecipeStateHandler(BaseStateHandler):
         """
         # 1. Получаем фото из сообщения
         if not message.attachments or not message.attachments[0].photo:
-            session_data["context"]["error"] = "❌ Не удалось получить фото. Попробуйте снова."
+            session_data["context"]["error"] = photo_parsing_error_message
             await self.show_screen(message, session_data)
             return None, session_data
 
@@ -93,7 +94,7 @@ class WaitingUserRecipeStateHandler(BaseStateHandler):
                     image_bytes = await resp.read()
                     image_base64 = base64.b64encode(image_bytes).decode('utf-8')
         except Exception as e:
-            session_data["context"]["error"] = f"❌ Ошибка загрузки фото: {e}"
+            session_data["context"]["error"] = f"Ошибка загрузки фото: {e}"
             await self.show_screen(message, session_data)
             return None, session_data
 

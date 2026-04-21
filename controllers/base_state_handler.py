@@ -4,6 +4,8 @@ from typing import Tuple, Optional
 from vkbottle.bot import Message
 from vkbottle_types.events.bot_events import MessageEvent
 
+from utils.messages import default_text_warning
+
 
 class BaseStateHandler(ABC):
 
@@ -57,7 +59,7 @@ class BaseStateHandler(ABC):
 
     async def handle_message(self, message: Message, session_data: dict) -> Tuple[Optional[str], dict]:
         """Обработка текстовых сообщений. По умолчанию — защита от текста."""
-        await message.reply("⚠️ В этом меню нельзя отправлять сообщения. Используйте кнопки.")
+        await message.reply(default_text_warning)
         await message.answer(
             message=self.get_message(session_data),
             keyboard=self.get_keyboard(session_data)
@@ -66,7 +68,7 @@ class BaseStateHandler(ABC):
 
     async def handle_photo(self, message: Message, session_data: dict) -> Tuple[Optional[str], dict]:
         """Обработка фотографий. По умолчанию — защита от фото."""
-        await message.reply("⚠️ В этом меню нельзя отправлять фото. Используйте кнопки.")
+        await message.reply(default_text_warning)
         await message.answer(
             message=self.get_message(session_data),
             keyboard=self.get_keyboard(session_data)

@@ -5,6 +5,7 @@ from controllers.base_state_handler import BaseStateHandler
 from utils.api_client import BreadlabAPIClient
 from utils.formatters import convert_dict_to_pretty_print
 from utils.keyboards import error_keyboard, view_recipe_keyboard
+from utils.messages import recipe_not_found_message, waiting_multiplier_default_message, wrong_multiplier_message
 
 
 class BaseViewRecipeStateHandler(BaseStateHandler):
@@ -41,7 +42,7 @@ class BaseViewRecipeStateHandler(BaseStateHandler):
                 session_data["context"]["recipe"] = recipe
                 session_data["context"]["error"] = None
             else:
-                session_data["context"]["error"] = "Рецепт не найден"
+                session_data["context"]["error"] = recipe_not_found_message
 
         # 2. Вызываем родительский show_screen, который возьмёт данные из `recipe` и `error`
         await super().show_screen(event, session_data)
@@ -78,14 +79,14 @@ class WaitingMultiplierStateHandler(BaseViewRecipeStateHandler):
         # Берём базовое сообщение (рецепт)
         base_message = super().get_message(session_data)
         # редактируем
-        return f"{base_message}\n\n🔢 Введите количество рецептов (множитель):"
+        return f"{base_message}\n\n{waiting_multiplier_default_message}"
 
     async def handle_message(self, message: Message, session_data: dict):
         text = self.get_text_from_message(message)
         try:
             multiplier = int(text.strip())
             if multiplier <= 0:
-                session_data["context"]["error"] = "❌ Число должно быть больше 0"
+                session_data["context"]["error"] = wrong_multiplier_message
                 await self.show_screen(message, session_data)
                 return None, session_data
 
@@ -97,7 +98,7 @@ class WaitingMultiplierStateHandler(BaseViewRecipeStateHandler):
             result, error = await BreadlabAPIClient.multiply_recipe(multiplier, recipe)
 
             if error:
-                session_data["context"]["error"] = f"❌ {error}"
+                session_data["context"]["error"] = error
                 await self.show_screen(message, session_data)
                 return None, session_data
 
@@ -106,7 +107,7 @@ class WaitingMultiplierStateHandler(BaseViewRecipeStateHandler):
             return "enter_multiplier", session_data
 
         except ValueError:
-            session_data["context"]["error"] = "❌ Введите целое число"
+            session_data["context"]["error"] = "Введите целое число"
             await self.show_screen(message, session_data)
             return None, session_data
 

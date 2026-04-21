@@ -5,6 +5,8 @@ from utils.api_client import BreadlabAPIClient
 from utils.formatters import convert_dict_to_pretty_print
 from utils.keyboards import error_keyboard, save_or_cancel_keyboard, save_choice_keyboard, \
     to_my_recipes_or_main_keyboard, confirm_update_existing_recipe_keyboard
+from utils.messages import save_edited_recipe_warning_message, save_as_version_success_message, \
+    update_existing_recipe_success_message, save_as_new_success_message
 
 
 class BaseSaveRecipeStateHandler(BaseStateHandler):
@@ -117,7 +119,7 @@ class SaveEditedExistingRecipesStateHandler(BaseSaveRecipeStateHandler):
         error = session_data["context"].get("error")
         if exists and not error:
             base_message = super().get_message(session_data)
-            warning = "🔔 Вы редактируете существующий рецепт. Убедитесь, что всё верно — действие необратимо."
+            warning = save_edited_recipe_warning_message
             message = f"{base_message}\n{warning}"
             return message
         return super().get_message(session_data)
@@ -175,11 +177,11 @@ class SaveSuccessStateHandler(BaseStateHandler):
         if save_as_version:
             parent_recipe = session_data["context"].get("recipe")
             parent_recipe_title = parent_recipe.get("title")
-            message = f"✅ Рецепт {new_recipe_title} успешно сохранен как версия рецепта: {parent_recipe_title}!"
+            message = save_as_version_success_message.format(new_recipe_title=new_recipe_title, parent_recipe_title=parent_recipe_title)
         elif update_existing_recipe:
-            message = f"✅ Рецепт {new_recipe_title} успешно обновлен!"
+            message = update_existing_recipe_success_message.format(new_recipe_title=new_recipe_title)
         elif save_as_new:
-            message = f"✅ Рецепт {new_recipe_title} успешно сохранен!"
+            message = save_as_new_success_message.format(new_recipe_title=new_recipe_title)
         else:
             message = "✅ Рецепт сохранён!"
         return message

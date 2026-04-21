@@ -5,6 +5,7 @@ from controllers.base_state_handler import BaseStateHandler
 from utils.api_client import BreadlabAPIClient
 from utils.formatters import convert_dict_to_pretty_print
 from utils.keyboards import error_keyboard, approving_edit_keyboard, update_existing_recipe_keyboard
+from utils.messages import edit_recipe_default_message
 
 
 class BaseEditRecipeStateHandler(BaseStateHandler):
@@ -36,7 +37,7 @@ class BaseEditRecipeStateHandler(BaseStateHandler):
         )
 
         recipe = convert_dict_to_pretty_print(recipe)
-        comment = 'Режим редактирования.\nПроверьте правильность названий ингредиентов и пропорций.\nМожно вносить правки. Например: "Добавь 2 г соли", или "замени ржаную муку на пшеничную"'
+        comment = edit_recipe_default_message
         message = f'{recipe}\n\n{comment}'
         return message
 
