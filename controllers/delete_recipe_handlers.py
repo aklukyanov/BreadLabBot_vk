@@ -1,6 +1,4 @@
-
 from vkbottle_types.events.bot_events import MessageEvent
-
 from controllers.base_state_handler import BaseStateHandler
 from utils.api_client import BreadlabAPIClient
 from utils.keyboards import approve_keyboard, error_keyboard, back_to_recipes_keyboard
@@ -8,6 +6,15 @@ from utils.messages import delete_recipe_approve_message
 
 
 class DeleteRecipeStateHandler(BaseStateHandler):
+    """
+    Экран подтверждения удаления рецепта.
+
+    Состояния:
+    - Показ подтверждения (кнопки Да/Нет)
+    - Показ ошибки (кнопка Повторить)
+    - Показ успеха (кнопка В мои рецепты)
+    """
+
     def get_message(self, session_data: dict) -> str:
         error = session_data["context"].get("error")
         deleted = session_data["context"].get("deleted")
@@ -18,7 +25,7 @@ class DeleteRecipeStateHandler(BaseStateHandler):
 
         return delete_recipe_approve_message
 
-    def get_keyboard(self, session_data:dict) -> str | None:
+    def get_keyboard(self, session_data: dict) -> str | None:
         error = session_data["context"].get("error")
         deleted = session_data["context"].get("deleted")
         if error:
@@ -37,6 +44,7 @@ class DeleteRecipeStateHandler(BaseStateHandler):
                 session_data["context"]["error"] = error
             if result:
                 session_data["context"]["deleted"] = recipe_id
+                session_data["context"].pop("error", None)  # Очищаем старую ошибку при успехе
             await self.show_screen(event, session_data)
             return None, session_data
         if cmd == "back":
@@ -48,8 +56,3 @@ class DeleteRecipeStateHandler(BaseStateHandler):
             session_data["context"].pop("error", None)
             return "open_my_recipes_list", session_data
         return await super().handle_event(event, session_data)
-
-
-
-
-

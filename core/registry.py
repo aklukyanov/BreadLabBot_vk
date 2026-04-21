@@ -1,14 +1,14 @@
-from controllers.delete_recipe import DeleteRecipeStateHandler
+from controllers.delete_recipe_handlers import DeleteRecipeStateHandler
 from controllers.main_menu_handlers import MainMenuStateHandler, ToolsMenuStateHandler, AboutBreadLabStateHandler
 from controllers.my_recipes_menu_handlers import MyRecipesListStateHandler, WaitingUserRecipeStateHandler
 from controllers.save_recipe_handlers import SaveAddedRecipeStateHandler, SaveEditedExistingRecipesStateHandler, \
         SaveSuccessStateHandler
 from controllers.edit_recipe_handlers import EditAddedRecipeStateHandler, EditExistingRecipeStateHandler
 from controllers.proportions_calc_handlers import LoadRecipeProportionsCalcStateHandler, ChooseRecipeProportionsCalcStateHandler, \
-        WaitingMultiplierStateHandler, ShowResultProportionsCalcStateHandler
+        ShowResultProportionsCalcStateHandler
+from controllers.view_recipe_handlers import WaitingMultiplierStateHandler, EditRecipeStateHandler
 from controllers.starter_calc_handlers import ChooseDirectionStateHandler, WaitingSourdoughWeightStateHandler, \
         ChoosingStarterProportionsStateHandler, ShowResultStarterCalcStateHandler
-from controllers.view_recipe import EditRecipeStateHandler
 
 states={"main":MainMenuStateHandler(),
         "tools":ToolsMenuStateHandler(),

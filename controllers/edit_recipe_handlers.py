@@ -5,7 +5,17 @@ from controllers.base_state_handler import BaseStateHandler
 from utils.api_client import BreadlabAPIClient
 from utils.formatters import convert_dict_to_pretty_print
 from utils.keyboards import error_keyboard, approving_edit_keyboard, update_existing_recipe_keyboard
+
+
 class BaseEditRecipeStateHandler(BaseStateHandler):
+    """
+    Базовый класс для экранов редактирования рецепта.
+
+    Содержит общую логику:
+    - Отображение рецепта и ошибок
+    - Отправка запросов к LLM (handle_message и edit_recipe_with_llm)
+    - Очистка временных данных при уходе
+    """
 
     def get_message(self, session_data: dict) -> str:
         error = session_data["context"].get("error")
@@ -19,20 +29,45 @@ class BaseEditRecipeStateHandler(BaseStateHandler):
 
         # Приоритет: recipe_to_save -> recipe_to_edit -> recipe
         recipe = (
-                session_data["context"].get("recipe_to_save") or # при редактировании
-                session_data["context"].get("recipe_to_edit") or # когда вошли в первый раз
-                session_data["context"].get("recipe") # когда пришли из просмотра рецепта: уже существующий рецепт (который есть в базе)
+                session_data["context"].get("recipe_to_save") or  # при редактировании
+                session_data["context"].get("recipe_to_edit") or  # когда вошли в первый раз
+                session_data["context"].get("recipe")
+        # когда пришли из просмотра рецепта: уже существующий рецепт (который есть в базе)
         )
 
-        recipe=convert_dict_to_pretty_print(recipe)
-        comment='Режим редактирования.\nПроверьте правильность названий ингредиентов и пропорций.\nМожно вносить правки. Например: "Добавь 2 г соли", или "замени ржаную муку на пшеничную"'
-        message=f'{recipe}\n\n{comment}'
+        recipe = convert_dict_to_pretty_print(recipe)
+        comment = 'Режим редактирования.\nПроверьте правильность названий ингредиентов и пропорций.\nМожно вносить правки. Например: "Добавь 2 г соли", или "замени ржаную муку на пшеничную"'
+        message = f'{recipe}\n\n{comment}'
         return message
 
     def get_keyboard(self, session_data: dict):
         return None
 
+    async def _call_llm_edit(self, event, session_data: dict, recipe: dict, instruction: str):
+        """
+        Отправляет запрос к LLM на редактирование рецепта и обрабатывает ответ.
+
+        При успехе сохраняет результат в session_data['context']['recipe_to_save'].
+        При ошибке сохраняет сообщение в session_data['context']['error'].
+        """
+        request = {"recipe": recipe, "instruction": instruction}
+        result, error = await BreadlabAPIClient.post("/recipe_edit/", request)
+
+        if error:
+            session_data["context"]["error"] = error
+            await self.show_screen(event, session_data)
+            return
+
+        if result["status"] == "ok":
+            session_data["context"]["recipe_to_save"] = result["data"]
+            session_data["context"].pop("error", None)
+            await self.show_screen(event, session_data)
+        elif result["status"] == "error":
+            session_data["context"]["error"] = result["message"]
+            await self.show_screen(event, session_data)
+
     async def handle_message(self, message: Message, session_data: dict):
+        """Обрабатывает текстовую инструкцию от пользователя."""
         session_data["context"].pop("error", None)
         session_data["context"].pop("exists", None)
         instruction = self.get_text_from_message(message)
@@ -40,26 +75,9 @@ class BaseEditRecipeStateHandler(BaseStateHandler):
                           session_data["context"].get("recipe_to_edit", None) or
                           session_data["context"].get("recipe", None))
 
-        session_data["context"]["instruction"]= instruction
-
-        request={"recipe":recipe_to_edit,
-                "instruction":instruction}
-
-        result, error = await BreadlabAPIClient.post("/recipe_edit/",request)
-        if error:
-            session_data["context"]["error"] = error
-            await self.show_screen(message, session_data)
-            return None, session_data
-        else:
-            if result["status"] == "ok":
-                session_data["context"]["recipe_to_save"]= result["data"]
-                session_data["context"].pop("error", None)
-                await self.show_screen(message, session_data)
-                return None, session_data
-            if result["status"] == "error":
-                session_data["context"]["error"] = result["message"]
-                await self.show_screen(message, session_data)
-                return None, session_data
+        session_data["context"]["instruction"] = instruction
+        await self._call_llm_edit(message, session_data, recipe_to_edit, instruction)
+        return None, session_data
 
     async def handle_event(self, event: MessageEvent, session_data: dict):
         cmd = self.get_payload_from_event(event, "cmd")
@@ -70,51 +88,44 @@ class BaseEditRecipeStateHandler(BaseStateHandler):
                     session_data["context"].get("recipe"))
 
             instruction = session_data["context"].get("instruction", None)
-            request = {"recipe": recipe,
-                           "instruction": instruction}
-            result, error = await BreadlabAPIClient.post("/recipe_edit/", request)
-            if error:
-                session_data["context"]["error"] = error
-                await self.show_screen(event, session_data)
-                return None, session_data
-            else:
-                if result["status"] == "ok":
-                    session_data["context"]["recipe_to_save"] = result["data"]
-                    session_data["context"].pop("error", None)
-                    await self.show_screen(event, session_data)
-                    return None, session_data
-                if result["status"] == "error":
-                    session_data["context"]["error"] = result["message"]
-                    await self.show_screen(event, session_data)
-                    return None, session_data
+            await self._call_llm_edit(event, session_data, recipe, instruction)
+            return None, session_data
 
         if cmd in ("back", "to_main"):
-            session_data["context"].pop("error",None)
+            session_data["context"].pop("error", None)
             session_data["context"].pop("exists", None)
             session_data["context"].pop("recipe_to_save", None)
             session_data["context"].pop("recipe_to_edit", None)
         return await super().handle_event(event, session_data)
 
+
 class EditAddedRecipeStateHandler(BaseEditRecipeStateHandler):
+    """
+    Экран редактирования нового (добавленного) рецепта.
+
+    Особенности:
+    - Проверяет уникальность названия перед сохранением.
+    - В зависимости от контекста (откуда пришли) показывает разные клавиатуры.
+    """
+
     def get_keyboard(self, session_data: dict):
         error = session_data["context"].get("error")
         if error:
             return error_keyboard("edit_recipe_with_llm")
-        exists=session_data["context"].get("exists")
+        exists = session_data["context"].get("exists")
         if exists:
             return error_keyboard("edit_recipe_with_llm")
 
-        state_config=session_data["state_config"]
+        state_config = session_data["state_config"]
         if 'load_recipe_proportions_calc' in state_config:
             return approving_edit_keyboard("enter_recipe", "rerun_edit_added_recipe")
         if 'my_recipes_list' in state_config:
             return approving_edit_keyboard("open_save_added_recipe", "rerun_edit_added_recipe")
 
-
     async def handle_event(self, event: MessageEvent, session_data: dict):
         cmd = self.get_payload_from_event(event, "cmd")
         if cmd == "rerun_edit_added_recipe":
-            session_data["context"].pop("recipe_to_save",None)
+            session_data["context"].pop("recipe_to_save", None)
             await self.show_screen(event, session_data)
             return None, session_data
 
@@ -124,9 +135,9 @@ class EditAddedRecipeStateHandler(BaseEditRecipeStateHandler):
                     session_data["context"].get("recipe_to_edit") or
                     session_data["context"].get("recipe")
             )
-            user_id=session_data["peer_id"]
+            user_id = session_data["peer_id"]
 
-            title=recipe_to_check.get("title")
+            title = recipe_to_check.get("title")
 
             exists, error = await BreadlabAPIClient.check_recipe_exists(user_id, title)
             if error:
@@ -145,6 +156,13 @@ class EditAddedRecipeStateHandler(BaseEditRecipeStateHandler):
 
 
 class EditExistingRecipeStateHandler(BaseEditRecipeStateHandler):
+    """
+    Экран редактирования существующего (сохранённого) рецепта.
+
+    Особенности:
+    - Проверяет уникальность названия.
+    - При совпадении предлагает обновить существующий рецепт.
+    """
 
     def get_keyboard(self, session_data: dict):
         error = session_data["context"].get("error")
@@ -160,7 +178,7 @@ class EditExistingRecipeStateHandler(BaseEditRecipeStateHandler):
     async def handle_event(self, event: MessageEvent, session_data: dict):
         cmd = self.get_payload_from_event(event, "cmd")
         if cmd == "rerun_edit_existing_recipe":
-            session_data["context"].pop("recipe_to_save",None)
+            session_data["context"].pop("recipe_to_save", None)
             await self.show_screen(event, session_data)
             return None, session_data
 
@@ -190,4 +208,3 @@ class EditExistingRecipeStateHandler(BaseEditRecipeStateHandler):
                 return cmd, session_data
 
         return await super().handle_event(event, session_data)
-

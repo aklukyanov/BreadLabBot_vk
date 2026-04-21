@@ -8,21 +8,44 @@ from utils.keyboards import error_keyboard, save_or_cancel_keyboard, save_choice
 
 
 class BaseSaveRecipeStateHandler(BaseStateHandler):
+    """
+    Базовый класс для экранов сохранения рецепта.
+
+    Содержит общую логику:
+    - Отображение рецепта и ошибок
+    - Отправка запроса на сохранение
+    - Очистка временных данных при уходе
+    """
+
     def get_message(self, session_data: dict) -> str:
         error = session_data["context"].get("error", None)
         if error:
             return f"❌ {error}"
 
-        recipe_to_save=(session_data["context"].get("recipe_to_save") or
-                        session_data["context"].get("recipe_to_edit") or
-                        session_data["context"].get("recipe"))
+        recipe_to_save = (session_data["context"].get("recipe_to_save") or
+                          session_data["context"].get("recipe_to_edit") or
+                          session_data["context"].get("recipe"))
         return convert_dict_to_pretty_print(recipe_to_save)
 
-    def get_keyboard(self, session_data:dict) -> str|None:
+    def get_keyboard(self, session_data: dict) -> str | None:
         error = session_data["context"].get("error")
         if error:
             return error_keyboard("confirm_save")
         return save_or_cancel_keyboard
+
+    async def _save_recipe(self, event, session_data: dict, user_id: str, recipe: dict, parent_id: str = None):
+        """
+        Сохраняет рецепт и обрабатывает ответ.
+
+        Returns:
+            (result, error) — результат запроса.
+        """
+        result, error = await BreadlabAPIClient.save_recipe(user_id, recipe, parent_id)
+        if error:
+            session_data["context"]["error"] = error
+            await self.show_screen(event, session_data)
+            return None, error
+        return result, None
 
     async def handle_event(self, event: MessageEvent, session_data: dict):
         cmd = self.get_payload_from_event(event, "cmd")
@@ -30,14 +53,10 @@ class BaseSaveRecipeStateHandler(BaseStateHandler):
             recipe_to_save = session_data["context"].get("recipe_to_save") or session_data["context"].get(
                 "recipe_to_edit")
             user_id = session_data["peer_id"]
-            recipe_id=session_data["context"].get("recipe_id")
-            if recipe_id:
-                result, error = await BreadlabAPIClient.save_recipe(user_id, recipe_to_save, recipe_id)
-            else:
-                result, error = await BreadlabAPIClient.save_recipe(user_id, recipe_to_save)
+            recipe_id = session_data["context"].get("recipe_id")
+
+            result, error = await self._save_recipe(event, session_data, user_id, recipe_to_save, recipe_id)
             if error:
-                session_data["context"]["error"] = error
-                await self.show_screen(event, session_data)
                 return None, session_data
 
             session_data["context"].pop("error", None)
@@ -59,24 +78,32 @@ class BaseSaveRecipeStateHandler(BaseStateHandler):
 
 
 class SaveAddedRecipeStateHandler(BaseSaveRecipeStateHandler):
+    """Сохранение нового (добавленного) рецепта."""
+
     async def handle_event(self, event: MessageEvent, session_data: dict):
         cmd = self.get_payload_from_event(event, "cmd")
         if cmd == "confirm_save":
-            recipe_to_save = session_data["context"].get("recipe_to_save") or session_data["context"].get("recipe_to_edit")
+            recipe_to_save = session_data["context"].get("recipe_to_save") or session_data["context"].get(
+                "recipe_to_edit")
             user_id = session_data["peer_id"]
 
-            result, error = await BreadlabAPIClient.save_recipe(user_id, recipe_to_save)
-
+            result, error = await self._save_recipe(event, session_data, user_id, recipe_to_save)
             if error:
-                session_data["context"]["error"] = error
-                await self.show_screen(event, session_data)
                 return None, session_data
+
             session_data["context"].pop("error", None)
             return cmd, session_data
         return await super().handle_event(event, session_data)
 
+
 class SaveEditedExistingRecipesStateHandler(BaseSaveRecipeStateHandler):
-    def get_keyboard(self, session_data:dict) -> str|None:
+    """
+    Сохранение отредактированного существующего рецепта.
+
+    Предлагает выбор: сохранить как новый, как версию или обновить существующий.
+    """
+
+    def get_keyboard(self, session_data: dict) -> str | None:
         error = session_data["context"].get("error")
         exists = session_data["context"].get("exists", None)
         if error:
@@ -98,7 +125,7 @@ class SaveEditedExistingRecipesStateHandler(BaseSaveRecipeStateHandler):
     async def handle_event(self, event: MessageEvent, session_data: dict):
         cmd = self.get_payload_from_event(event, "cmd")
         if cmd == "confirm_update_existing_recipe":
-            recipe_id=session_data["context"].get("recipe_id")
+            recipe_id = session_data["context"].get("recipe_id")
             recipe_to_update = (session_data["context"].get("recipe_to_save") or
                                 session_data["context"].get("recipe_to_edit") or
                                 session_data["context"].get("recipe"))
@@ -113,38 +140,37 @@ class SaveEditedExistingRecipesStateHandler(BaseSaveRecipeStateHandler):
             session_data["context"]["update_existing_recipe"] = True
             return cmd, session_data
 
-        if cmd=="save_as_new":
+        if cmd == "save_as_new":
             recipe_to_save = session_data["context"].get("recipe_to_save") or session_data["context"].get(
                 "recipe_to_edit")
             user_id = session_data["peer_id"]
-            result, error = await BreadlabAPIClient.save_recipe(user_id, recipe_to_save)
+            result, error = await self._save_recipe(event, session_data, user_id, recipe_to_save)
             if error:
-                session_data["context"]["error"] = error
-                await self.show_screen(event, session_data)
                 return None, session_data
             session_data["context"].pop("save_as_new", None)
             session_data["context"].pop("save_as_version", None)
             session_data["context"].pop("update_existing_recipe", None)
             session_data["context"].pop("error", None)
             session_data["context"]["save_as_new"] = True
-
             return cmd, session_data
 
         return await super().handle_event(event, session_data)
 
+
 class SaveSuccessStateHandler(BaseStateHandler):
+    """Экран успешного сохранения рецепта. Показывает сообщение и кнопки навигации."""
+
     def get_message(self, session_data: dict) -> str:
         recipe = (
-                session_data["context"].get("recipe_to_save") or  # при редактировании
-                session_data["context"].get("recipe_to_edit") or  # когда вошли в первый раз
+                session_data["context"].get("recipe_to_save") or
+                session_data["context"].get("recipe_to_edit") or
                 session_data["context"].get("recipe")
-        # когда пришли из просмотра рецепта: уже существующий рецепт (который есть в базе)
         )
         update_existing_recipe = session_data["context"].get("update_existing_recipe")
         save_as_new = session_data["context"].get("save_as_new")
         save_as_version = session_data["context"].get("save_as_version")
 
-        new_recipe_title=recipe.get("title")
+        new_recipe_title = recipe.get("title")
 
         if save_as_version:
             parent_recipe = session_data["context"].get("recipe")
@@ -153,7 +179,7 @@ class SaveSuccessStateHandler(BaseStateHandler):
         elif update_existing_recipe:
             message = f"✅ Рецепт {new_recipe_title} успешно обновлен!"
         elif save_as_new:
-            message=f"✅ Рецепт {new_recipe_title} успешно сохранен!"
+            message = f"✅ Рецепт {new_recipe_title} успешно сохранен!"
         else:
             message = "✅ Рецепт сохранён!"
         return message
@@ -163,15 +189,13 @@ class SaveSuccessStateHandler(BaseStateHandler):
 
     async def handle_event(self, event: MessageEvent, session_data: dict):
         cmd = self.get_payload_from_event(event, "cmd")
-        if cmd=="back":
+        if cmd == "back":
             temp_keys = [
                 "error", "exists", "update_existing_recipe",
-                "save_as_version", "save_as_new", "recipe_to_save", "recipe_to_edit"
+                "save_as_version", "save_as_new", "recipe_to_save", "recipe_to_edit",
+                "parent_title"
             ]
             for key in temp_keys:
                 session_data["context"].pop(key, None)
 
         return await super().handle_event(event, session_data)
-
-
-

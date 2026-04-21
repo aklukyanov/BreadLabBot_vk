@@ -1,9 +1,9 @@
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable
 
 from vkbottle.bot import Message
 from vkbottle_types.events.bot_events import MessageEvent
 
-from controllers.state_handlers_registry import states
+from core.registry import states
 from fsm.main_menu_fsm import MainMenu
 from logger import sm_logger
 from storage import storage

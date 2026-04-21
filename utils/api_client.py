@@ -145,6 +145,11 @@ class BreadlabAPIClient:
             request)
 
     @classmethod
+    async def recognize_photo(cls, image_base64: str):
+        """Отправить фото в LLM для распознавания рецепта."""
+        return await cls.post("/recognize_photo/", {"photo": image_base64})
+
+    @classmethod
     async def save_recipe(cls, user_id: str, recipe_data: dict, parent_id: int = None):
         """Сохранить рецепт. Возвращает (data, error)."""
         request_data = {
