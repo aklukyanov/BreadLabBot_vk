@@ -5,8 +5,6 @@ from controllers.base_state_handler import BaseStateHandler
 from utils.api_client import BreadlabAPIClient
 from utils.formatters import convert_dict_to_pretty_print
 from utils.keyboards import error_keyboard, approving_edit_keyboard, update_existing_recipe_keyboard
-
-
 class BaseEditRecipeStateHandler(BaseStateHandler):
 
     def get_message(self, session_data: dict) -> str:
