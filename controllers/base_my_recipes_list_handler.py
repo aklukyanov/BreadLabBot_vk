@@ -2,7 +2,6 @@ from controllers.base_state_handler import BaseStateHandler
 from utils.api_client import BreadlabAPIClient
 from utils.keyboards import recipes_keyboard, error_keyboard
 
-
 class BaseMyRecipesListStateHandler(BaseStateHandler):
     async def show_screen(self, event, session_data, custom_message=None, custom_keyboard=None):
         page = session_data["context"].get("page", 1)

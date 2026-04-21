@@ -3,7 +3,7 @@ from controllers.main_menu_handlers import MainMenuStateHandler, ToolsMenuStateH
 from controllers.my_recipes_menu_handlers import MyRecipesListStateHandler, WaitingUserRecipeStateHandler
 from controllers.save_recipe_handlers import SaveAddedRecipeStateHandler, SaveEditedExistingRecipesStateHandler, \
         SaveSuccessStateHandler
-from controllers.base_edit_recipe_handler import EditAddedRecipeStateHandler, EditExistingRecipeStateHandler
+from controllers.edit_recipe_handlers import EditAddedRecipeStateHandler, EditExistingRecipeStateHandler
 from controllers.proportions_calc_handlers import LoadRecipeProportionsCalcStateHandler, ChooseRecipeProportionsCalcStateHandler, \
         WaitingMultiplierStateHandler, ShowResultProportionsCalcStateHandler
 from controllers.starter_calc_handlers import ChooseDirectionStateHandler, WaitingSourdoughWeightStateHandler, \
