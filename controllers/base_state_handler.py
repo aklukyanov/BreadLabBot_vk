@@ -4,7 +4,7 @@ from typing import Tuple, Optional
 from vkbottle.bot import Message
 from vkbottle_types.events.bot_events import MessageEvent
 
-from utils.messages import default_text_warning
+from utils.messages import default_text_warning, default_photo_warning
 
 
 class BaseStateHandler(ABC):
@@ -68,7 +68,7 @@ class BaseStateHandler(ABC):
 
     async def handle_photo(self, message: Message, session_data: dict) -> Tuple[Optional[str], dict]:
         """Обработка фотографий. По умолчанию — защита от фото."""
-        await message.reply(default_text_warning)
+        await message.reply(default_photo_warning)
         await message.answer(
             message=self.get_message(session_data),
             keyboard=self.get_keyboard(session_data)

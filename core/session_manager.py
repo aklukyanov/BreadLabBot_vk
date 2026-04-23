@@ -46,6 +46,15 @@ class SessionManager:
             send_startup_message=lambda: message.answer("Напишите 'Начать', чтобы начать сессию.")
         )
 
+    async def handle_photo(self, message: Message) -> None:
+        """Обработка фотографий."""
+        await self._process(
+            peer_id=message.peer_id,
+            event=message,
+            controller_method_name="handle_photo",
+            log_prefix="фото",
+            send_startup_message=lambda: message.answer("Напишите 'Начать', чтобы начать сессию.")
+        )
     # ========================================================================
     # УНИВЕРСАЛЬНЫЙ РАБОТНИК (Сердце менеджера)
     # ========================================================================
@@ -98,6 +107,9 @@ class SessionManager:
         sm_logger.debug(f"Получил от {current_state} команду {cmd} и данные {session_data}")
 
         if cmd is None:
+            # Сохраняем сессию, даже если не было перехода FSM
+            storage.set(key=peer_id, value=session_data)
+            sm_logger.debug(f"Сохранил в storage {session_data}")
             return
 
         # 3. Работа с FSM

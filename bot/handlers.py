@@ -32,7 +32,7 @@ async def hello_handler(message: Message):
                 },
                 timeout=1
             ) as response:
-                if response.status in [200,201]:
+                if response.status in [200, 201]:
                     result = await response.json()
                     print("User saved:", result)
                 else:
@@ -47,8 +47,7 @@ async def hello_handler(message: Message):
                         "state_config": ["main"],
                         "context": {}
                     })
-        test_data=storage.get(key=message.peer_id)
-
+        test_data = storage.get(key=message.peer_id)
         print(f"Сохранили в storage {test_data}")
 
 
@@ -60,11 +59,13 @@ async def events_handler(event: MessageEvent):
         user_id=event.object.user_id,
         peer_id=event.object.peer_id,
     )
-
     await manager.handle_event(event)
 
 @global_labeler.message(blocking=False)
-async def message_handler(message:Message):
-    await manager.handle_message(message)
-
-
+async def message_handler(message: Message):
+    """Обработчик всех сообщений (текст и фото)."""
+    # Проверяем, есть ли фото во вложениях
+    if message.attachments and message.attachments[0].photo:
+        await manager.handle_photo(message)
+    else:
+        await manager.handle_message(message)

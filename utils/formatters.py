@@ -50,7 +50,7 @@ def convert_dict_to_pretty_print(dict_to_convert: dict, multiplier: int = None, 
 
 def format_quantity_and_unit(quantity: float, unit: str) -> str:
     """
-    Форматирует количество и единицу измерения для красивого вывода.
+    Форматирует количество и единицы измерения для красивого вывода.
 
     Поддерживает:
     - г. ↔ кг.
@@ -104,3 +104,4 @@ def format_quantity_and_unit(quantity: float, unit: str) -> str:
 
     # По умолчанию
     return f"{quantity} {unit}"
+
