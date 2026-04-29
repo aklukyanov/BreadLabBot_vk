@@ -11,7 +11,6 @@ def fsm():
 def session_manager():
     return SessionManager()
 
-
 def test_step_forward(session_manager, fsm):
     state_config = ["main"]
     fsm.current_state_value = "main"

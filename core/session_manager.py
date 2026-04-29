@@ -81,7 +81,7 @@ class SessionManager:
         sm_logger.debug(f"Получил {log_prefix}: {event}")
 
         # 1. Загрузка сессии из хранилища
-        session_data = storage.get(peer_id)
+        session_data = await storage.get(peer_id)
         sm_logger.debug(f"Забрал данные из базы: {session_data}")
 
         if session_data is None:
@@ -108,7 +108,7 @@ class SessionManager:
 
         if cmd is None:
             # Сохраняем сессию, даже если не было перехода FSM
-            storage.set(key=peer_id, value=session_data)
+            await storage.set(key=peer_id, value=session_data)
             sm_logger.debug(f"Сохранил в storage {session_data}")
             return
 
@@ -126,7 +126,7 @@ class SessionManager:
         await states[new_state].show_screen(event, session_data)
 
         # 6. Сохранение сессии
-        storage.set(key=peer_id, value=session_data)
+        await storage.set(key=peer_id, value=session_data)
         sm_logger.debug(f"Сохранил в storage {session_data}")
 
     # ========================================================================

@@ -1,5 +1,3 @@
-from tkinter import Menu
-
 from statemachine import StateChart, State
 
 from fsm.my_recipes_menu_fsm import MyRecipesMenuFSM

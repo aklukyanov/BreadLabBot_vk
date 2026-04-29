@@ -21,7 +21,7 @@ async def hello_handler(message: Message):
     async with ClientSession() as session:
         try:
             async with session.post(
-                "http://127.0.0.1:8000/api/users/",
+                "http://breadlab-server:8000/api/users/",
                 json={
                     "external_id": str(user.id),
                     "channel": "vk",
@@ -41,13 +41,13 @@ async def hello_handler(message: Message):
         except Exception as e:
             print(f"Ошибка сохранения пользователя: {e}")
 
-        storage.set(key=message.peer_id,
+        await storage.set(key=message.peer_id,
                     value={
                         "peer_id": message.peer_id,
                         "state_config": ["main"],
                         "context": {}
                     })
-        test_data = storage.get(key=message.peer_id)
+        test_data = await storage.get(key=message.peer_id)
         print(f"Сохранили в storage {test_data}")
 
 

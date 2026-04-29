@@ -6,7 +6,7 @@ from logger import api_client_logger
 class BreadlabAPIClient:
     """Клиент для взаимодействия с API BreadLab."""
 
-    BASE_URL = "http://127.0.0.1:8000/api"
+    BASE_URL = "http://breadlab-server:8000/api"
     http_session = None
 
     # ========================================================================

@@ -1,0 +1,14 @@
+.idea
+.venv
+__pycache__
+.git
+tests/
+.env
+.gitignore
+*.pyc
+Dockerfile
+.dockerignore
+.coverage
+pytest.ini
+README.md
+LICENSE
