@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  vkbot:
+    build: .
+    container_name: vkbot
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    restart: always
+    networks:
+      - breadlab-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: breadlab-redis
+    volumes:
+      - redis-data:/data
+    restart: always
+    networks:
+      - breadlab-net
+
+volumes:
+  redis-data:
+
+networks:
+  breadlab-net:
+    external: true
