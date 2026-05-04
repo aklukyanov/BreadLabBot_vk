@@ -35,4 +35,8 @@ jobs:
           script: |
             cd ~/BreadLabProject/BreadLabBot_vk
             git pull origin main
+            cat > .env <<EOF
+            bot_token=${{ secrets.VK_BOT_TOKEN }}
+            ollama_api=${{ secrets.OLLAMA_API }}
+            EOF
             docker compose up -d --build
