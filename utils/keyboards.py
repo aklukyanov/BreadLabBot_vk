@@ -142,8 +142,7 @@ def recipes_keyboard(recipes, current_page, has_prev, has_next):
     keyboard = Keyboard(inline=True)
     for recipe in recipes:
         title = recipe['recipe']['data']['title']
-        if len(title) >= 40: # 40 - лимит символов для инлайн кнопок
-            title=title[:35]+"..."
+        title = title[:38] + "…" if len(title) > 38 else title
         recipe_id = recipe['id']
         keyboard.add(Callback(title, payload={"cmd": "open_view_recipe", "recipe_id": recipe_id}))
         keyboard.row()
