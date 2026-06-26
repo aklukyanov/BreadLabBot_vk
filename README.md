@@ -47,5 +47,11 @@
     docker-compose up --build
 
 Серверная часть проекта: https://github.com/aklukyanov/BreadLab-server
+
+Проект развернут на удаленном сервере и доступен по ссылке:
+https://vk.com/club236839245
+(напишите в чат сообщества и бот вам ответит)
+
+
     
 
