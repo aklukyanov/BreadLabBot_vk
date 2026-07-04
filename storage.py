@@ -1,4 +1,6 @@
-from vkbottle import ABCStorage
+from typing import Hashable, Any
+
+from vkbottle import ABCStorage, CtxStorage
 import json
 import redis.asyncio as aioredis
 
@@ -21,4 +23,36 @@ class RedisStorage(ABCStorage):
     async def contains(self, key: str) -> bool:
         return await self.redis.exists(key)
 
-storage = RedisStorage(host="breadlab-redis", port=6379)
+
+class AsyncCtxStorage:
+    """
+    Асинхронная обёртка над CtxStorage.
+    Позволяет использовать await с методами get/set/delete/contains.
+    """
+
+    def __init__(self, default: dict[str, Any] | None = None):
+        # Создаём синхронный CtxStorage
+        self._storage = CtxStorage(default=default or {})
+
+    async def get(self, key: Hashable) -> Any:
+        """Асинхронная обёртка для get"""
+        # Просто вызываем синхронный метод
+        return self._storage.get(key)
+
+    async def set(self, key: Hashable, value: Any) -> None:
+        """Асинхронная обёртка для set"""
+        self._storage.set(key, value)
+
+    async def delete(self, key: Hashable) -> None:
+        """Асинхронная обёртка для delete"""
+        self._storage.delete(key)
+
+    async def contains(self, key: Hashable) -> bool:
+        """Асинхронная обёртка для contains"""
+        return self._storage.contains(key)
+
+# "Для прода"
+# storage = RedisStorage(host="breadlab-redis", port=6379)
+
+"Для разработки"
+storage = AsyncCtxStorage()
