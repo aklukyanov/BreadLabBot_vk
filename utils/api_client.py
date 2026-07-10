@@ -1,15 +1,17 @@
 from typing import Tuple, Optional
 import aiohttp
 from logger import api_client_logger
+from settings import CURRENT_URL
+
 
 class BreadlabAPIClient:
     """Клиент для взаимодействия с API BreadLab."""
 
     "для прода"
-    # BASE_URL = "http://breadlab-server:8000/api"
+    # BASE_URL = "f{prod_base_url}/api"
 
     "для разработки"
-    BASE_URL = "http://127.0.0.1:8000/api"
+    BASE_URL = f"{CURRENT_URL}/api"
     http_session = None
 
     # ========================================================================

@@ -4,6 +4,8 @@ from vkbottle import ABCStorage, CtxStorage
 import json
 import redis.asyncio as aioredis
 
+from settings import CURRENT_STORAGE
+
 
 class RedisStorage(ABCStorage):
     def __init__(self, host: str = "localhost", port: int = 6379, db: int = 0, ttl: int = 1800):
@@ -51,8 +53,8 @@ class AsyncCtxStorage:
         """Асинхронная обёртка для contains"""
         return self._storage.contains(key)
 
-# "Для прода"
-# storage = RedisStorage(host="breadlab-redis", port=6379)
 
-"Для разработки"
-storage = AsyncCtxStorage()
+if CURRENT_STORAGE == 'prod':
+    storage = RedisStorage(host="breadlab-redis", port=6379)
+elif CURRENT_STORAGE == 'dev':
+    storage = AsyncCtxStorage()
