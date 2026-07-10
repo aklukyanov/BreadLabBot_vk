@@ -100,8 +100,8 @@ class ChoosingStarterProportionsStateHandler(BaseStateHandler):
             request_data = {
                 "direction": session_data["context"]["direction"],
                 "original_starter": session_data["context"]["original_starter"],
-                "original_water": session_data["context"]["original_starter"],
-                "original_flour": session_data["context"]["original_starter"],
+                "original_water": session_data["context"]["original_water"],
+                "original_flour": session_data["context"]["original_flour"],
                 "starter_part": starter,
                 "water_part": water,
                 "flour_part": flour
