@@ -1,7 +1,7 @@
 name: CI Bot
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
     paths-ignore:
         - 'README.md'
         - 'docs/**'
@@ -9,6 +9,8 @@ on:
         - '.gitignore'
         - '.github/**'
         - '**.md'
+  pull_request:
+    branches: [ main, dev ]
 
 jobs:
   tests:

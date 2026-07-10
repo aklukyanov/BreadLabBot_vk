@@ -4,24 +4,22 @@ from vkbottle_types import GroupEventType
 from vkbottle_types.events.bot_events import MessageEvent
 
 from config import global_labeler, manager
+from logger import handler_logger
+from settings import CURRENT_URL
 from storage import storage
 from utils.keyboards import main_menu_keyboard
 from utils.messages import greeting
 
-
+'ТОЧКА ВХОДА'
 @global_labeler.message(text="Начать")
 async def hello_handler(message: Message):
-    # Получаем информацию о пользователе
-    user_info = await message.ctx_api.users.get(user_ids=message.from_id)
-    user = user_info[0]
-    await message.answer(message=greeting.format(user.first_name))
-    await message.answer('Главное меню', keyboard=main_menu_keyboard)
+    try:
+        user_info = await message.ctx_api.users.get(user_ids=message.from_id)
+        user = user_info[0]
 
-    # Сохраняем пользователя в бд
-    async with ClientSession() as session:
-        try:
+        async with ClientSession() as session:
             async with session.post(
-                "http://breadlab-server:8000/api/users/",
+                url=f"{CURRENT_URL}/api/users/",
                 json={
                     "external_id": str(user.id),
                     "channel": "vk",
@@ -32,14 +30,16 @@ async def hello_handler(message: Message):
                 },
                 timeout=1
             ) as response:
-                if response.status in [200, 201]:
-                    result = await response.json()
-                    print("User saved:", result)
-                else:
-                    print("Error status:", response.status)
-                    print("Error text:", await response.text())
-        except Exception as e:
-            print(f"Ошибка сохранения пользователя: {e}")
+                if response.status not in [200, 201]:
+                    error_body = await response.text()
+                    handler_logger.warning(f"Error status: {response.status}, body: {error_body}")
+                    await message.answer(message='Сервис временно недоступен. Попробуйте позже.')
+                    return
+                result = await response.json()
+                handler_logger.info(f"User saved: {result}")
+
+        await message.answer(message=greeting.format(user.first_name))
+        await message.answer('Главное меню', keyboard=main_menu_keyboard)
 
         await storage.set(key=message.peer_id,
                     value={
@@ -47,8 +47,10 @@ async def hello_handler(message: Message):
                         "state_config": ["main"],
                         "context": {}
                     })
-        test_data = await storage.get(key=message.peer_id)
-        print(f"Сохранили в storage {test_data}")
+    except Exception as e:
+        handler_logger.error(f"Ошибка hello_handler: {e}", exc_info=True)
+        await message.answer(message='Сервис временно недоступен. Попробуйте позже.')
+
 
 
 @global_labeler.raw_event(event=GroupEventType.MESSAGE_EVENT, dataclass=MessageEvent, blocking=False)
