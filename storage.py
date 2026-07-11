@@ -54,7 +54,7 @@ class AsyncCtxStorage:
         return self._storage.contains(key)
 
 
-if CURRENT_STORAGE == 'prod':
+if CURRENT_STORAGE == 'redis_storage':
     storage = RedisStorage(host="breadlab-redis", port=6379)
-elif CURRENT_STORAGE == 'dev':
+elif CURRENT_STORAGE == 'ctx_storage':
     storage = AsyncCtxStorage()
