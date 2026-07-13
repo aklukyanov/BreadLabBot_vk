@@ -6,11 +6,6 @@ from settings import CURRENT_URL
 
 class BreadlabAPIClient:
     """Клиент для взаимодействия с API BreadLab."""
-
-    "для прода"
-    # BASE_URL = "f{prod_base_url}/api"
-
-    "для разработки"
     BASE_URL = f"{CURRENT_URL}/api"
     http_session = None
 
