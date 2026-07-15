@@ -10,7 +10,7 @@ services:
       - redis
     restart: always
     networks:
-      - breadlab-net
+      - breadlab-front
 
   redis:
     image: redis:7-alpine
@@ -19,11 +19,11 @@ services:
       - redis-data:/data
     restart: always
     networks:
-      - breadlab-net
+      - breadlab-front
 
 volumes:
   redis-data:
 
 networks:
-  breadlab-net:
+  breadlab-front:
     external: true
