@@ -1,5 +1,6 @@
 from statemachine import StateChart, State
 
+from fsm.baking_sessions_fsm import SessionMenuFSM
 from fsm.my_recipes_menu_fsm import MyRecipesMenuFSM
 from fsm.tools_menu_fsm import ToolsMenuFSM
 
@@ -10,17 +11,19 @@ class MainMenu(StateChart):
     strict=True
 
     main=State(initial=True)
+    session_menu=SessionMenuFSM
     tools_menu=ToolsMenuFSM
     my_recipes_menu=MyRecipesMenuFSM
     about=State()
 
     open_tools=main.to(tools_menu)
     open_my_recipes_menu=main.to(my_recipes_menu)
+    open_baking_sessions=main.to(session_menu)
     open_about=main.to(about)
 
-    back=tools_menu.to(main) | my_recipes_menu.to(main) | about.to(main)
+    back=tools_menu.to(main) | my_recipes_menu.to(main) | about.to(main) | session_menu.to(main)
 
-    to_main=tools_menu.to(main) | my_recipes_menu.to(main)
+    to_main=tools_menu.to(main) | my_recipes_menu.to(main) | session_menu.to(main)
 
     def on_enter_state(self, source:State, target: State, event: str):
         fsm_logger.debug(f"Перешли из {source.id} в {target.id}. Событие: {event}")

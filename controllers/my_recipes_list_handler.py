@@ -10,6 +10,7 @@ class BaseMyRecipesListStateHandler(BaseStateHandler):
     Загружает рецепты с пагинацией, отображает список и обрабатывает листание.
     Наследники могут переопределить get_keyboard для разных режимов.
     """
+    mode = None
 
     async def show_screen(self, event, session_data, custom_message=None, custom_keyboard=None):
         page = session_data["context"].get("page", 1)
@@ -39,7 +40,7 @@ class BaseMyRecipesListStateHandler(BaseStateHandler):
         has_prev = session_data["context"]["has_prev"]
         has_next = session_data["context"]["has_next"]
 
-        return recipes_keyboard(recipes, page, has_prev, has_next)
+        return recipes_keyboard(recipes, page, has_prev, has_next, self.mode)
 
     def get_message(self, session_data: dict) -> str:
         error = session_data["context"].get("error")
@@ -51,12 +52,12 @@ class BaseMyRecipesListStateHandler(BaseStateHandler):
 
     async def handle_event(self, event, session_data):
         cmd = self.get_payload_from_event(event, "cmd")
-        if cmd == "show_recipes_list":
+        if cmd == "show_recipes_list" or cmd == "open_baking_sessions":
             page = self.get_payload_from_event(event, "page", 1)
             session_data["context"]["page"] = page
             await self.show_screen(event, session_data)
             return None, session_data
-        if cmd == "open_view_recipe":
+        if cmd == "open_view_recipe" or cmd == "open_choose_session":
             recipe_id = self.get_payload_from_event(event, "recipe_id")
             session_data["context"]["recipe_id"] = recipe_id
             return await super().handle_event(event, session_data)

@@ -182,3 +182,36 @@ class BreadlabAPIClient:
     async def recognize_photo(cls, image_base64: str) -> Tuple[Optional[dict], Optional[str]]:
         """Отправляет фото рецепта в LLM для распознавания."""
         return await cls.post("/recognize_photo/", {"photo": image_base64})
+
+    # ========================================================================
+    # СЕССИИ ВЫПЕЧКИ
+    # ========================================================================
+
+    @classmethod
+    async def create_baking_session(cls, external_id: str, recipe_id: int) -> Tuple[Optional[dict], Optional[str]]:
+        """Создаёт новую сессию выпечки (статус 'unfinished' ставит сервер)."""
+        request_data = {
+            "external_id": external_id,
+            "recipe_id": recipe_id,
+        }
+        return await cls.post("/baking_sessions/", request_data)
+
+    @classmethod
+    async def finish_baking_session(cls, session_id: int) -> Tuple[Optional[dict], Optional[str]]:
+        """Переводит сессию выпечки в статус 'finished'."""
+        return await cls.patch(
+            f"/baking_sessions/{session_id}/update/",
+            {"status": "finished"}
+        )
+
+    @classmethod
+    async def get_unfinished_baking_sessions(cls, external_id: str, recipe_id: int, page: int = 1) -> Tuple[Optional[dict], Optional[str]]:
+        """Возвращает незавершённые (unfinished) сессии выпечки рецепта с пагинацией (4 на страницу)."""
+        return await cls.get(
+            f"/users/{external_id}/baking_sessions/",
+            params={
+                "recipe_id": recipe_id,
+                "status": "unfinished",
+                "page": page,
+            }
+        )

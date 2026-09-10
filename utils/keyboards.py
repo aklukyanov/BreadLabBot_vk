@@ -45,6 +45,8 @@ to_my_recipes_or_main_keyboard = (
 
 main_menu_keyboard = (
     Keyboard(inline=True)
+    .add(Callback("🚀 Сеансы выпечки", payload={"cmd": "open_baking_sessions"}))
+    .row()
     .add(Callback("📋 Мои рецепты", payload={"cmd": "my_recipes_menu"}))
     .row()
     .add(Callback("🔧 Инструменты", payload={"cmd": "tools"}))
@@ -137,25 +139,42 @@ back_to_recipes_keyboard = (
 ).get_json()
 
 
-def recipes_keyboard(recipes, current_page, has_prev, has_next):
+def recipes_keyboard(recipes, current_page, has_prev, has_next, mode):
     """Создаёт клавиатуру из рецептов пользователя (режим редактирования)."""
     keyboard = Keyboard(inline=True)
-    for recipe in recipes:
-        title = recipe['recipe']['data']['title']
-        if len(title) >= 40: # 40 - лимит символов для инлайн кнопок
-            title=title[:35]+"..."
-        recipe_id = recipe['id']
-        keyboard.add(Callback(title, payload={"cmd": "open_view_recipe", "recipe_id": recipe_id}))
-        keyboard.row()
+    if mode == None:
+        for recipe in recipes:
+            title = recipe['recipe']['data']['title']
+            if len(title) >= 40: # 40 - лимит символов для инлайн кнопок
+                title=title[:35]+"..."
+            recipe_id = recipe['id']
+            keyboard.add(Callback(title, payload={"cmd": "open_view_recipe", "recipe_id": recipe_id}))
+            keyboard.row()
 
-    if has_prev:
-        keyboard.add(Callback("◀️ Назад", payload={"cmd": "show_recipes_list", "page": current_page - 1}))
-    if has_next:
-        keyboard.add(Callback("Вперёд ▶️", payload={"cmd": "show_recipes_list", "page": current_page + 1}))
+        if has_prev:
+            keyboard.add(Callback("◀️ Назад", payload={"cmd": "show_recipes_list", "page": current_page - 1}))
+        if has_next:
+            keyboard.add(Callback("Вперёд ▶️", payload={"cmd": "show_recipes_list", "page": current_page + 1}))
+            keyboard.row()
+        keyboard.add(Callback("➕ Добавить рецепт", payload={"cmd": "open_add_recipe"}))
+        keyboard.add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
 
-    keyboard.row()
-    keyboard.add(Callback("➕ Добавить рецепт", payload={"cmd": "open_add_recipe"}))
-    keyboard.add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+    if mode == "baking_session":
+        for recipe in recipes:
+            title = recipe['recipe']['data']['title']
+            if len(title) >= 40:  # 40 - лимит символов для инлайн кнопок
+                title = title[:35] + "..."
+            recipe_id = recipe['id']
+            keyboard.add(Callback(title, payload={"cmd": "open_choose_session", "recipe_id": recipe_id}))
+            keyboard.row()
+
+        if has_prev:
+            keyboard.add(Callback("◀️ Назад", payload={"cmd": "open_baking_sessions", "page": current_page - 1}))
+        if has_next:
+            keyboard.add(Callback("Вперёд ▶️", payload={"cmd": "open_baking_sessions", "page": current_page + 1}))
+            keyboard.row()
+        keyboard.add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+
     return keyboard.get_json()
 
 
@@ -181,7 +200,9 @@ def recipes_keyboard_proportions_calc(recipes, current_page, has_prev, has_next)
     return keyboard.get_json()
 
 
-def view_recipe_keyboard(mode: str) -> str:
+def view_recipe_keyboard(mode: str, sessions: list | None = None,
+                         current_page: int = 1, has_prev: bool = False,
+                         has_next: bool = False) -> str:
     """Клавиатура для экрана отображения рецепта."""
     keyboard = Keyboard(inline=True)
     if mode == "edit_recipe":
@@ -198,6 +219,27 @@ def view_recipe_keyboard(mode: str) -> str:
         keyboard.row()
         keyboard.add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
         return keyboard.get_json()
+    if mode == 'baking_session':
+        for session in sessions or []:
+            created = session["created_at"][:16].replace("T", " ")
+            keyboard.add(Callback(created, payload={
+                "cmd": "continue_session",
+                "session_id": session["id"],
+                "recipe_title": session["recipe_title"],
+            }))
+            keyboard.row()
+
+        if has_prev or has_next:
+            if has_prev:
+                keyboard.add(Callback("◀️ Назад", payload={"cmd": "show_sessions", "page": current_page - 1}))
+            if has_next:
+                keyboard.add(Callback("Вперёд ▶️", payload={"cmd": "show_sessions", "page": current_page + 1}))
+            keyboard.row()
+
+        keyboard.add(Callback("➕ Новая сессия", payload={"cmd": "create_new_session"}))
+        keyboard.add(Callback("⬅️ Назад", payload={"cmd": "back"}))
+        keyboard.add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+
     return keyboard.get_json()
 
 

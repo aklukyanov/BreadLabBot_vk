@@ -1,5 +1,7 @@
+from controllers.baking_session_handlers import ChooseRecipeStateHandler, ChooseSessionStateHandler
 from controllers.delete_recipe_handlers import DeleteRecipeStateHandler
 from controllers.main_menu_handlers import MainMenuStateHandler, ToolsMenuStateHandler, AboutBreadLabStateHandler
+from controllers.my_recipes_list_handler import BaseMyRecipesListStateHandler
 from controllers.my_recipes_menu_handlers import MyRecipesListStateHandler, WaitingUserRecipeStateHandler
 from controllers.save_recipe_handlers import SaveAddedRecipeStateHandler, SaveEditedExistingRecipesStateHandler, \
         SaveSuccessStateHandler
@@ -10,9 +12,13 @@ from controllers.view_recipe_handlers import WaitingMultiplierStateHandler, Edit
 from controllers.starter_calc_handlers import ChooseDirectionStateHandler, WaitingSourdoughWeightStateHandler, \
         ChoosingStarterProportionsStateHandler, ShowResultStarterCalcStateHandler
 
-states={"main":MainMenuStateHandler(),
+states={
+        # main_menu
+        "main":MainMenuStateHandler(),
+        "choose_recipe":ChooseRecipeStateHandler(), # baking_session_menu
         "tools":ToolsMenuStateHandler(),
         "about":AboutBreadLabStateHandler(),
+
         # starter_calc
         "choose_direction":ChooseDirectionStateHandler(),
         "waiting_sourdough_weight":WaitingSourdoughWeightStateHandler(),
@@ -37,4 +43,7 @@ states={"main":MainMenuStateHandler(),
         "waiting_user_recipe_proportions_calc": WaitingUserRecipeStateHandler(),
         "edit_added_recipe_proportions_calc": EditAddedRecipeStateHandler(),
         "save_added_recipe_proportions_calc":SaveAddedRecipeStateHandler(),
+        # baking_sessions
+        "choose_session":ChooseSessionStateHandler()
+
         }
