@@ -1,4 +1,5 @@
-from controllers.baking_session_handlers import ChooseRecipeStateHandler, ChooseSessionStateHandler
+from controllers.baking_session_handlers import ChooseRecipeStateHandler, ChooseSessionStateHandler, \
+        BakingSessionStateHandler
 from controllers.delete_recipe_handlers import DeleteRecipeStateHandler
 from controllers.main_menu_handlers import MainMenuStateHandler, ToolsMenuStateHandler, AboutBreadLabStateHandler
 from controllers.my_recipes_list_handler import BaseMyRecipesListStateHandler
@@ -44,6 +45,7 @@ states={
         "edit_added_recipe_proportions_calc": EditAddedRecipeStateHandler(),
         "save_added_recipe_proportions_calc":SaveAddedRecipeStateHandler(),
         # baking_sessions
-        "choose_session":ChooseSessionStateHandler()
+        "choose_session":ChooseSessionStateHandler(),
+        "baking_session":BakingSessionStateHandler(),
 
         }

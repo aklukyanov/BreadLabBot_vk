@@ -1,4 +1,4 @@
-def convert_dict_to_pretty_print(dict_to_convert: dict, multiplier: int = None, show_hydration: bool = True) -> str:
+def convert_dict_to_pretty_print(dict_to_convert: dict, multiplier: int = None, show_hydration: bool = True, show_instructions:bool = True) -> str:
     """
     Преобразует рецепт из словаря в красивое текстовое представление.
 
@@ -44,6 +44,10 @@ def convert_dict_to_pretty_print(dict_to_convert: dict, multiplier: int = None, 
     # Гидратация
     if show_hydration and 'hydration' in recipe:
         answer_for_user.append(f"💧 Гидратация: {recipe['hydration']}%")
+
+    #Технология
+    if show_instructions and 'instructions' in recipe:
+        answer_for_user.append(recipe['instructions'])
 
     return "\n".join(answer_for_user)
 

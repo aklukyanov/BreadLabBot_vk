@@ -215,3 +215,12 @@ class BreadlabAPIClient:
                 "page": page,
             }
         )
+
+    @classmethod
+    async def create_baking_note(cls, session_id: int, note_type: str, note: str) -> Tuple[Optional[dict], Optional[str]]:
+        """Создаёт заметку (text/photo) для сессии выпечки."""
+        return await cls.post("/baking_notes/", {
+            "baking_session_id": session_id,
+            "type": note_type,
+            "note": note,
+        })

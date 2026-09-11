@@ -236,7 +236,7 @@ def view_recipe_keyboard(mode: str, sessions: list | None = None,
                 keyboard.add(Callback("Вперёд ▶️", payload={"cmd": "show_sessions", "page": current_page + 1}))
             keyboard.row()
 
-        keyboard.add(Callback("➕ Новая сессия", payload={"cmd": "create_new_session"}))
+        keyboard.add(Callback("➕ Новая сессия", payload={"cmd": "start_session"}))
         keyboard.add(Callback("⬅️ Назад", payload={"cmd": "back"}))
         keyboard.add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
 
@@ -323,6 +323,14 @@ update_existing_recipe_keyboard = (
 confirm_update_existing_recipe_keyboard = (
     Keyboard(inline=True)
     .add(Callback("🔄 Подтвердить обновление", payload={"cmd": "confirm_update_existing_recipe"}))
+    .row()
+    .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
+    .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
+).get_json()
+
+baking_session_keyboard = (
+    Keyboard(inline=True)
+    .add(Callback("Завершить сессию", payload={"cmd": "finish_baking_session"}))
     .row()
     .add(Callback("⬅️ Назад", payload={"cmd": "back"}))
     .add(Callback("🏠 В главное меню", payload={"cmd": "to_main"}))
