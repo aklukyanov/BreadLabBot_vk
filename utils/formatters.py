@@ -46,7 +46,7 @@ def convert_dict_to_pretty_print(dict_to_convert: dict, multiplier: int = None, 
         answer_for_user.append(f"💧 Гидратация: {recipe['hydration']}%")
 
     #Технология
-    if show_instructions and 'instructions' in recipe:
+    if show_instructions and recipe.get('instructions'):
         answer_for_user.append(recipe['instructions'])
 
     return "\n".join(answer_for_user)
